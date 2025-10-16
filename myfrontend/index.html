@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Life - Conectando Gerações</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a id="active" href="./index.html">Início</a></li>
+          <li><a href="./quem-somos.html">Quem Somos</a></li>
+          <li><a href="./nossa-missao.html">Nossa Missão</a></li>
+          <li><a href="./blog.html">Blog</a></li>
+          <li><a href="./faq.html">FAQ</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <div id="auth-links" style="display: flex; gap: 1rem;">
+          <a href="./login.html" class="btn btn-outline">Entrar</a>
+          <a href="./cadastro.html" class="btn btn-primary">Cadastre-se</a>
+        </div>
+        <div id="user-menu" style="display: none; align-items: center; gap: 1rem;">
+          <span id="user-name"></span>
+          <span id="user-role" class="role-badge"></span>
+          <a href="./dashboard.html" class="btn btn-primary">Dashboard</a>
+          <button id="logout-btn" class="btn btn-outline">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-content">
+        <div class="hero-text-box">
+          <h1>Transforme seu tempo em cuidado. Seja voluntário.</h1>
+          <div class="hero-buttons">
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+              <a href="./cadastro.html" class="btn btn-primary"
+                style="font-size: 1.125rem; padding: 0.75rem 2rem;">Comece
+                Agora</a>
+              <a href="./seja-voluntario.html" class="btn btn-outline"
+                style="font-size: 1.125rem; padding: 0.75rem 2rem; color: white; border-color: white;">Seja
+                Voluntário</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-image-box">
+          <img src="./images/img-home.png" alt="Duas mulheres sorrindo em uma trilha.">
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 4rem 1rem;">
+      <div class="container">
+        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 3rem;">Como Funciona</h2>
+        <div class="grid grid-cols-3">
+          <div class="card text-center">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+            <h3 style="margin-bottom: 0.5rem;">1. Cadastre-se</h3>
+            <p class="text-muted">Crie sua conta como idoso ou voluntário em poucos minutos</p>
+          </div>
+          <div class="card text-center">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+            <h3 style="margin-bottom: 0.5rem;">2. Escolha Atividades</h3>
+            <p class="text-muted">Navegue por diversas atividades e encontre as que mais combinam com você</p>
+          </div>
+          <div class="card text-center">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+            <h3 style="margin-bottom: 0.5rem;">3. Conecte-se</h3>
+            <p class="text-muted">Agende encontros e crie conexões significativas</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background-color: white; padding: 4rem 1rem;">
+      <div class="container">
+        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 1rem;">Atividades Populares</h2>
+        <p style="text-align: center; color: var(--color-text-muted); margin-bottom: 3rem;">Descubra as atividades mais
+          procuradas</p>
+        <div class="grid grid-cols-3" id="popular-activities"></div>
+        <div style="text-align: center; margin-top: 2rem;">
+          <a href="./atividades.html" class="btn btn-primary">Ver Todas as Atividades</a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 4rem 1rem;">
+      <div class="container">
+        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 3rem;">Por Que Participar?</h2>
+        <div class="grid grid-cols-2">
+          <div class="card">
+            <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Para Idosos</h3>
+            <ul style="list-style: none; line-height: 2;">
+              <li>✓ Combate à solidão e isolamento social</li>
+              <li>✓ Estímulo físico e mental</li>
+              <li>✓ Novas amizades e experiências</li>
+              <li>✓ Atividades adaptadas às suas necessidades</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--color-secondary); margin-bottom: 1rem;">Para Voluntários</h3>
+            <ul style="list-style: none; line-height: 2;">
+              <li>✓ Faça a diferença na comunidade</li>
+              <li>✓ Aprenda com a sabedoria dos mais velhos</li>
+              <li>✓ Desenvolva empatia e paciência</li>
+              <li>✓ Flexibilidade de horários</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas e enriquecedoras.</p>
+      </div>
+      <div class="footer-section">
+        <h3>Links Rápidos</h3>
+        <ul>
+          <li><a href="./quem-somos.html">Quem Somos</a></li>
+          <li><a href="./nossa-missao.html">Nossa Missão</a></li>
+          <li><a href="./seja-voluntario.html">Seja Voluntário</a></li>
+          <li><a href="./beneficios.html">Benefícios</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Suporte</h3>
+        <ul>
+          <li><a href="./faq.html">FAQ</a></li>
+          <li><a href="./blog.html">Blog</a></li>
+          <li><a href="mailto:contato@conexaosenior.com.br">Contato</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/app.js"></script>
+
+  <script>
+    // Load popular activities
+    document.addEventListener('DOMContentLoaded', () => {
+      const atividades = obterAtividades().slice(0, 3);
+      const container = document.getElementById('popular-activities');
+
+      container.innerHTML = atividades.map(atividade => `
+        <div class="card">
+          <img src="${atividade.imagem}" alt="${atividade.titulo}" style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: 1rem;">
+          <h3 style="margin-bottom: 0.5rem;">${atividade.titulo}</h3>
+          <p class="text-muted" style="margin-bottom: 1rem;">${atividade.descricao}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="badge badge-info">${atividade.categoria}</span>
+            <span class="text-muted">${atividade.duracao}</span>
+          </div>
+        </div>
+      `).join('');
+    });
+  </script>
+</body>
+
+</html>

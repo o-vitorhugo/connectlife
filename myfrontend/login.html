@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Início</a></li>
+          <li><a href="./cadastro.html">Cadastre-se</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="login-container">
+      <div class="login-painel">
+        <div class="card-header">
+          <h1>Bem-vindo de Volta</h1>
+          <p class="card-description">Entre com suas credenciais para acessar sua conta</p>
+        </div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="seu@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn btn-primary"
+            style="width: 100%; height: 40px; margin-top: 1rem; font-size: 16px;">Entrar</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <p class="text-muted">Não tem uma conta? <a href="./cadastro.html"
+              style="color: var(--color-primary); font-weight: 600;">Cadastre-se</a></p>
+        </div>
+      </div>
+      <div class="imagem-painel">
+        <img src="./images/img-login.png" alt="">
+      </div>
+    </div>
+  </main>
+
+  <footer style="margin-top: 0;">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      console.log('[v1] Tentando fazer login...');
+
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('password').value;
+
+      console.log('[v1] Email:', email);
+
+      try {
+        // Chamada correta e assíncrona
+        const resultado = await API.usuarios.entrar(email, senha);
+
+        console.log('[v1] Resultado do login:', resultado);
+
+        if (resultado && resultado.token) {
+          console.log('[v1] Login bem-sucedido!');
+
+          // Salva o token no localStorage
+          localStorage.setItem('token', resultado.token);
+          localStorage.setItem('usuario', JSON.stringify(resultado.usuario));
+
+          // Redireciona
+          window.location.href = './dashboard.html';
+        } else {
+          alert('Email ou senha incorretos.');
+        }
+      } catch (erro) {
+        console.error('[v1] Erro no login:', erro);
+        alert('Erro ao tentar fazer login. Verifique suas credenciais.');
+      }
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meus Agendamentos - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝 Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./dashboard.html">Dashboard</a></li>
+          <li><a href="./atividades.html">Atividades</a></li>
+          <li><a id="active" href="./agendamentos.html">Agendamentos</a></li>
+          <li><a href="./calendario.html" class="active">Calendário</a></li>
+          <li><a href="./historico.html">Histórico</a></li>
+          <li><a href="./eventos.html">Eventos</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem;">
+    <div class="container">
+      <div class="flex-between" style="margin-bottom: 2rem;">
+        <h1>Meus Agendamentos</h1>
+        <div id="btn-nova-atividade"></div>
+      </div>
+
+      <!-- 🧭 Abas -->
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button class="tab-button active" data-tab="confirmado">Confirmados</button></li>
+          <li><button class="tab-button" data-tab="pendente">Pendentes</button></li>
+          <li><button class="tab-button" data-tab="concluido">Concluídos</button></li>
+          <li><button class="tab-button" data-tab="cancelado">Cancelados</button></li>
+        </ul>
+      </div>
+
+      <!-- Conteúdo das abas -->
+      <div id="confirmado" class="tab-content active"></div>
+      <div id="pendente" class="tab-content"></div>
+      <div id="concluido" class="tab-content"></div>
+      <div id="cancelado" class="tab-content"></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
+
+  <script>
+    (async () => {
+      // ==============================
+      // 🔐 Verifica autenticação
+      // ==============================
+      if (!API.usuarios.requerAutenticacao()) {
+        window.location.href = "./login.html";
+        return;
+      }
+
+      const usuario = API.usuarios.obterUsuarioAtual();
+
+      // ==============================
+      // 📦 Busca dados da API
+      // ==============================
+      let agendamentos = await API.calendario.obterAgendamentosUsuario(usuario.id);
+      let atividades = await API.atividades.obterAtividadesUsuario(usuario.id);
+      const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
+
+      if (!Array.isArray(agendamentos)) agendamentos = [agendamentos];
+      if (!Array.isArray(atividades)) atividades = [atividades];
+
+      // ==============================
+      // 🧭 Alterna abas
+      // ==============================
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab-button").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
+          button.classList.add("active");
+          document.getElementById(button.dataset.tab).classList.add("active");
+        });
+      });
+
+      // ==============================
+      // 🗓️ Renderiza agendamentos
+      // ==============================
+      function renderizarAgendamentos(status, idContainer) {
+        const container = document.getElementById(idContainer);
+        if (!container) return;
+
+        const filtrados = agendamentos.filter((a) => a.status === status);
+
+        if (filtrados.length === 0) {
+          container.innerHTML = '<p class="text-muted">Nenhum agendamento nesta categoria.</p>';
+          return;
+        }
+
+        const agora = new Date();
+
+        container.innerHTML = filtrados.map((agendamento) => {
+          const atividade = atividades.find((a) => a.id === agendamento.id_atividade) || agendamento.atividade;
+          const participante = usuarios.find(
+            (u) => u.id === (usuario.papel === "IDOSO" ? agendamento.id_voluntario : agendamento.id_idoso)
+          );
+
+          const badgesStatus = {
+            confirmado: "success",
+            pendente: "warning",
+            concluido: "info",
+            cancelado: "error",
+          };
+
+          const textosStatus = {
+            confirmado: "Confirmado",
+            pendente: "Pendente",
+            concluido: "Concluído",
+            cancelado: "Cancelado",
+          };
+
+          const dataHoraAgendada = new Date(`${agendamento.data}T${agendamento.hora}`);
+          const podeConcluir = agora >= dataHoraAgendada;
+
+          return `
+            <div class="card">
+              <div class="flex-between" style="margin-bottom: 1rem;">
+                <h3>${atividade ? atividade.titulo : "Atividade"}</h3>
+                <span class="badge badge-${badgesStatus[status]}">${textosStatus[status]}</span>
+              </div>
+
+              <div class="grid grid-cols-2">
+                <div>
+                  <p><strong>Data:</strong> ${formatarData(agendamento.data)}</p>
+                  <p><strong>Horário:</strong> ${agendamento.hora}</p>
+                  <p><strong>${usuario.papel === "IDOSO" ? "Voluntário" : "Idoso"}:</strong>
+                    ${participante ? participante.nome : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  ${agendamento.observacoes
+              ? `<p><strong>Observações:</strong> ${agendamento.observacoes}</p>`
+              : ""}
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                ${status === "pendente" && usuario.papel === "VOLUNTARIO"
+              ? `<button class="btn btn-secondary" onclick="confirmarAgendamento(${agendamento.id})">Confirmar</button>`
+              : ""}
+                
+                ${["confirmado", "pendente"].includes(status)
+              ? `<button class="btn btn-danger" onclick="cancelarAgendamento(${agendamento.id})">Cancelar</button>`
+              : ""}
+                
+                ${status === "confirmado" && podeConcluir && usuario.papel === "VOLUNTARIO"
+              ? `<button class="btn btn-primary" onclick="concluirAgendamento(${agendamento.id})">Concluir</button>`
+              : ""}
+                
+                ${status === "concluido" && usuario.papel === "IDOSO"
+              ? `<a href="./avaliar.html?id=${agendamento.id}" class="btn btn-primary">Avaliar</a>`
+              : ""}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Botão "Nova Atividade" - Aparece somente para IDOSOS
+      const btnContainer = document.getElementById("btn-nova-atividade");
+      if (usuario && usuario.papel === "IDOSO") {
+        btnContainer.innerHTML = `<a href="./atividades.html" class="btn btn-primary">Nova Atividade</a>`;
+      }
+
+      // ==============================
+      // 🚀 Renderiza todas as abas
+      // ==============================
+      renderizarAgendamentos("confirmado", "confirmado");
+      renderizarAgendamentos("pendente", "pendente");
+      renderizarAgendamentos("concluido", "concluido");
+      renderizarAgendamentos("cancelado", "cancelado");
+
+      // ==============================
+      // 🔘 Ações dos botões
+      // ==============================
+      window.confirmarAgendamento = async function (id) {
+        await API.calendario.atualizar(id, { status: "confirmado" });
+        location.reload();
+      };
+
+      window.cancelarAgendamento = async function (id) {
+        if (confirm("Tem certeza que deseja cancelar este agendamento?")) {
+          await API.calendario.atualizar(id, { status: "cancelado" });
+          location.reload();
+        }
+      };
+
+      window.concluirAgendamento = async function (id) {
+        await API.calendario.atualizar(id, { status: "concluido" });
+        alert("Atividade concluída com sucesso!");
+        location.reload();
+      };
+
+      // ==============================
+      // 🧭 Função auxiliar
+      // ==============================
+      function formatarData(dataStr) {
+        if (!dataStr) return "N/A";
+        const [ano, mes, dia] = dataStr.split("-");
+        return `${dia}/${mes}/${ano}`;
+      }
+    })();
+  </script>
+</body>
+
+</html>

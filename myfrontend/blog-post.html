@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post - Connect Life</title>
+  <link rel="stylesheet" href="./styles/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="container header-content">
+      <a href="./index.html" class="logo">🤝 Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Início</a></li>
+          <li><a href="./blog.html">Blog</a></li>
+          <li><a href="./login.html" class="btn btn-primary">Entrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 800px; margin-top: 2rem; margin-bottom: 4rem;">
+    <a href="./blog.html"
+      style="color: var(--primary); text-decoration: none; display: inline-block; margin-bottom: 2rem;">
+      ← Voltar para o Blog
+    </a>
+    <article id="blogPost" class="card" style="padding: 3rem;">
+      Blog post content will be populated by JavaScript
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--primary);">Conexão Gerações</h3>
+          <p>Conectando idosos e voluntários para uma vida mais plena e significativa.</p>
+        </div>
+        <div>
+          <h4>Links Rápidos</h4>
+          <ul style="list-style: none;">
+            <li><a href="./quem-somos.html" style="color: white;">Quem Somos</a></li>
+            <li><a href="./nossa-missao.html" style="color: white;">Nossa Missão</a></li>
+            <li><a href="./beneficios.html" style="color: white;">Benefícios</a></li>
+            <li><a href="./faq.html" style="color: white;">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contato</h4>
+          <p>Email: contato@conexaogeracoes.com.br</p>
+          <p>Telefone: (11) 1234-5678</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Conexão Gerações. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./js/app.js"></script>
+
+  <script>
+    const parametrosUrl = new URLSearchParams(window.location.search);
+    const idPost = parametrosUrl.get('id');
+
+    if (!idPost) {
+      window.location.href = './blog.html';
+    } else {
+      const post = obterPostBlog(idPost);
+
+      if (!post) {
+        alert('Post não encontrado');
+        window.location.href = './blog.html';
+      } else {
+        document.title = `${post.titulo} - Conexão Gerações`;
+        document.getElementById('blogPost').innerHTML = `
+          <span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--primary); color: white; border-radius: 20px; font-size: 0.875rem; margin-bottom: 1rem;">${post.categoria}</span>
+          <h1 style="margin-bottom: 1rem;">${post.titulo}</h1>
+          <p style="color: var(--muted-foreground); margin-bottom: 2rem;">
+            Por ${post.autor} • ${formatarData(post.data)}
+          </p>
+          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--foreground);">
+            ${post.conteudo}
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+
+</html>

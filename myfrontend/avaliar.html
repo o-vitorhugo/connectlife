@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avaliar Atividade - Connect Life</title>
+    <link rel="stylesheet" href="./styles/styles.css" />
+    <style>
+      .rating-stars {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #ccc;
+      }
+
+      .rating-stars .filled {
+        color: gold;
+      }
+
+      .card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="container header-content">
+        <a href="./index.html" class="logo">🤝 Connect Life</a>
+        <nav>
+          <ul>
+            <li><a href="./dashboard.html">Dashboard</a></li>
+            <li><a href="./historico.html">Histórico</a></li>
+            <li><button onclick="API.usuarios.sair()" class="btn btn-outline">Sair</button></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container" style="max-width: 700px; margin-top: 2rem; margin-bottom: 4rem">
+      <h1 class="mb-4">Avaliar Atividade</h1>
+
+      <div class="card" id="activityInfo">
+        <p>Carregando informações da atividade...</p>
+      </div>
+
+      <div class="card">
+        <h2 class="mb-2">Sua Avaliação</h2>
+        <form id="ratingForm">
+          <div class="form-group">
+            <label>Classificação</label>
+            <div class="rating-stars" id="ratingStars">
+              <span class="star" data-rating="1">★</span>
+              <span class="star" data-rating="2">★</span>
+              <span class="star" data-rating="3">★</span>
+              <span class="star" data-rating="4">★</span>
+              <span class="star" data-rating="5">★</span>
+            </div>
+            <input type="hidden" id="rating" name="rating" required />
+          </div>
+
+          <div class="form-group">
+            <label for="comment">Comentário (opcional)</label>
+            <textarea id="comment" name="comment" rows="5" placeholder="Compartilhe sua experiência..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 1rem">
+            <button type="submit" class="btn btn-primary" style="flex: 1">Enviar Avaliação</button>
+            <a href="./historico.html" class="btn btn-outline" style="flex: 1; text-align: center">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script src="./js/api.js"></script>
+
+    <script>
+      ;(async () => {
+        if (!API.usuarios.requerAutenticacao()) return
+        const usuario = API.usuarios.obterUsuarioAtual()
+
+        if (usuario.papel !== "IDOSO") {
+          alert("Apenas idosos podem avaliar atividades.")
+          window.location.href = "./historico.html"
+          return
+        }
+
+        const urlParams = new URLSearchParams(window.location.search)
+        const idAgendamento = urlParams.get("id")
+
+        if (!idAgendamento) {
+          alert("Agendamento não encontrado.")
+          window.location.href = "./historico.html"
+          return
+        }
+
+        let agendamento
+        try {
+          const todos = await fazerRequisicao("/agendamentos")
+          agendamento = todos.find((a) => a.id == idAgendamento)
+        } catch (erro) {
+          console.error("Erro ao buscar agendamento:", erro)
+          alert("Erro ao carregar informações do agendamento.")
+          window.location.href = "./historico.html"
+          return
+        }
+
+        if (!agendamento || agendamento.status !== "concluido") {
+          alert("Apenas atividades concluídas podem ser avaliadas.")
+          window.location.href = "./historico.html"
+          return
+        }
+
+        if (agendamento.id_idoso !== usuario.id) {
+          alert("Você não tem permissão para avaliar este agendamento.")
+          window.location.href = "./historico.html"
+          return
+        }
+
+        const avaliacoes = await fazerRequisicao("/avaliacoes")
+        const avaliacaoExistente = avaliacoes.find((av) => av.id_agendamento === agendamento.id)
+        if (avaliacaoExistente) {
+          alert("Este agendamento já foi avaliado.")
+          window.location.href = "./historico.html"
+          return
+        }
+
+        const atividade = agendamento.atividade
+        const idoso = agendamento.idoso
+        const voluntario = agendamento.voluntario
+
+        document.getElementById("activityInfo").innerHTML = `
+        <h3 style="margin-bottom: 1rem;">${atividade ? atividade.titulo : "Atividade"}</h3>
+        <p style="color: var(--muted-foreground); margin-bottom: 1rem;">
+          ${atividade ? atividade.descricao || "" : ""}
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+          <p><strong>Data:</strong> ${formatarData(agendamento.data)}</p>
+          <p><strong>Horário:</strong> ${agendamento.hora}</p>
+          ${idoso ? `<p><strong>Idoso:</strong> ${idoso.nome}</p>` : ""}
+          ${voluntario ? `<p><strong>Voluntário:</strong> ${voluntario.nome}</p>` : ""}
+        </div>
+      `
+
+        let notaSelecionada = 0
+        const estrelas = document.querySelectorAll(".star")
+
+        estrelas.forEach((estrela) => {
+          estrela.addEventListener("click", function () {
+            notaSelecionada = parseInt(this.dataset.rating)
+            document.getElementById("rating").value = notaSelecionada
+            atualizarEstrelas(notaSelecionada)
+          })
+
+          estrela.addEventListener("mouseenter", function () {
+            atualizarEstrelas(parseInt(this.dataset.rating))
+          })
+        })
+
+        document.getElementById("ratingStars").addEventListener("mouseleave", function () {
+          atualizarEstrelas(notaSelecionada)
+        })
+
+        function atualizarEstrelas(nota) {
+          estrelas.forEach((estrela, indice) => {
+            estrela.classList.toggle("filled", indice < nota)
+          })
+        }
+
+        document.getElementById("ratingForm").addEventListener("submit", async (e) => {
+          e.preventDefault()
+
+          if (notaSelecionada === 0) {
+            alert("Por favor, selecione uma nota.")
+            return
+          }
+
+          const comentario = document.getElementById("comment").value
+
+          const avaliacao = {
+            idAgendamento: parseInt(idAgendamento),
+            nota: notaSelecionada,
+            comentario,
+          }
+
+          try {
+            await fazerRequisicao("/avaliacoes", {
+              method: "POST",
+              body: JSON.stringify(avaliacao),
+            })
+            alert("Avaliação enviada com sucesso!")
+            window.location.href = "./historico.html"
+          } catch (erro) {
+            console.error("Erro ao enviar avaliação:", erro)
+            alert("Erro ao enviar avaliação. Tente novamente.")
+          }
+        })
+
+        function formatarData(dataStr) {
+          if (!dataStr) return "N/A"
+          const data = new Date(dataStr)
+          return data.toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        }
+      })()
+    </script>
+  </body>
+</html>

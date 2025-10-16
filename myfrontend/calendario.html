@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendário - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝 Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./dashboard.html">Dashboard</a></li>
+          <li><a href="./atividades.html">Atividades</a></li>
+          <li><a href="./agendamentos.html">Agendamentos</a></li>
+          <li><a id="active" href="./calendario.html" class="active">Calendário</a></li>
+          <li><a href="./historico.html">Histórico</a></li>
+          <li><a href="./eventos.html">Eventos</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem;">
+    <div class="container">
+      <h1 style="margin-bottom: 2rem;">Calendário de Atividades</h1>
+
+      <div class="grid grid-cols-2">
+        <!-- CALENDÁRIO -->
+        <div class="calendar">
+          <div class="calendar-header">
+            <button id="prevMonth" class="btn btn-outline">← Anterior</button>
+            <h2 id="currentMonth"></h2>
+            <button id="nextMonth" class="btn btn-outline">Próximo →</button>
+          </div>
+
+          <div class="calendar-grid" style="margin-bottom: 1rem;">
+            <div>Dom</div>
+            <div>Seg</div>
+            <div>Ter</div>
+            <div>Qua</div>
+            <div>Qui</div>
+            <div>Sex</div>
+            <div>Sáb</div>
+          </div>
+
+          <div class="calendar-grid" id="calendarDays"></div>
+        </div>
+
+        <!-- DETALHES -->
+        <div>
+          <div class="card">
+            <h3 style="margin-bottom: 1rem;">Atividades do Dia</h3>
+            <div id="selectedDateActivities">
+              <p class="text-muted">Selecione uma data no calendário.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
+  <script>
+    // ========= FUNÇÕES AUXILIARES =========
+    function formatarDataLegivel(dataISO) {
+      if (!dataISO) return "N/A";
+      const [ano, mes, dia] = dataISO.split("T")[0].split("-");
+      const nomesMeses = [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+      ];
+      return `${parseInt(dia)} de ${nomesMeses[parseInt(mes) - 1]} de ${ano}`;
+    }
+
+
+    // ========= INÍCIO DO SCRIPT PRINCIPAL =========
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 🔐 Verificação de autenticação
+      if (!API.usuarios.requerAutenticacao()) {
+        window.location.href = "./login.html";
+        return;
+      }
+
+      const usuario = API.usuarios.obterUsuarioAtual();
+      let dataAtual = new Date();
+      let agendamentos = await API.calendario.obterAgendamentosUsuario(usuario.id);
+      if (!Array.isArray(agendamentos)) agendamentos = [agendamentos];
+
+      // ========= FUNÇÃO: Renderizar calendário =========
+      function renderizarCalendario() {
+        const ano = dataAtual.getFullYear();
+        const mes = dataAtual.getMonth();
+
+        const nomesMeses = [
+          "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+          "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
+        document.getElementById("currentMonth").textContent = `${nomesMeses[mes]} ${ano}`;
+
+        const primeiroDia = new Date(ano, mes, 1).getDay();
+        const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+
+        const diasCalendario = document.getElementById("calendarDays");
+        diasCalendario.innerHTML = "";
+
+        // Preenche dias vazios antes do 1º do mês
+        for (let i = 0; i < primeiroDia; i++) {
+          const diaVazio = document.createElement("div");
+          diaVazio.className = "calendar-day other-month";
+          diasCalendario.appendChild(diaVazio);
+        }
+
+        // Cria dias do mês
+        for (let dia = 1; dia <= diasNoMes; dia++) {
+          const elementoDia = document.createElement("div");
+          elementoDia.className = "calendar-day";
+          elementoDia.textContent = dia;
+
+          const stringData = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+
+          // Filtra apenas os agendamentos não cancelados
+          const agendamentosDia = agendamentos.filter(a => {
+            if (!a?.data) return false;
+            const dataAgendamento = a.data.split("T")[0];
+            return dataAgendamento === stringData && a.status !== "cancelado";
+          });
+
+          // Marca dias com atividades
+          if (agendamentosDia.length > 0) {
+            elementoDia.classList.add("has-activity");
+            elementoDia.title = `${agendamentosDia.length} atividade(s)`;
+          }
+
+          // Clique no dia
+          elementoDia.addEventListener("click", () => selecionarData(stringData, agendamentosDia));
+
+          diasCalendario.appendChild(elementoDia);
+        }
+      }
+
+      // ========= FUNÇÃO: Selecionar Data =========
+      async function selecionarData(stringData, agendamentosDia) {
+        document.querySelectorAll(".calendar-day").forEach(el => el.classList.remove("selected"));
+
+        const diaEl = [...document.querySelectorAll(".calendar-day")]
+          .find(el => el.textContent === String(Number(stringData.split("-")[2])));
+        if (diaEl) diaEl.classList.add("selected");
+
+        const container = document.getElementById("selectedDateActivities");
+        if (!agendamentosDia || agendamentosDia.length === 0) {
+          container.innerHTML = `<p class="text-muted">Nenhuma atividade neste dia.</p>`;
+          return;
+        }
+
+        const atividades = await API.atividades.listar();
+        const rotulosStatus = {
+          pendente: "Pendente",
+          confirmado: "Confirmado",
+          concluido: "Concluído"
+        };
+        const coresStatus = {
+          pendente: "warning",
+          confirmado: "success",
+          concluido: "info"
+        };
+
+        container.innerHTML = `
+          <p style="font-weight: 600; margin-bottom: 1rem;">${formatarDataLegivel(stringData)}</p>
+          ${agendamentosDia.map(agendamento => {
+          const atividade = atividades.find(a => a.id === agendamento.id_atividade);
+          return `
+              <div style="padding: 1rem; background-color: var(--color-background); border-radius: 10px; margin-bottom: 0.75rem;">
+                <h4 style="margin-bottom: 0.4rem;">${atividade?.titulo || "Atividade"}</h4>
+                <p><strong>Horário:</strong> ${agendamento.hora}</p>
+                <span class="badge badge-${coresStatus[agendamento.status] || "secondary"}">
+                  ${rotulosStatus[agendamento.status] || agendamento.status}
+                </span>
+                ${agendamento.observacoes ? `<p style="margin-top: 0.5rem;">${agendamento.observacoes}</p>` : ""}
+              </div>
+            `;
+        }).join("")}
+        `;
+      }
+
+      // ========= BOTÕES DE NAVEGAÇÃO =========
+      document.getElementById("prevMonth").addEventListener("click", () => {
+        dataAtual.setMonth(dataAtual.getMonth() - 1);
+        renderizarCalendario();
+      });
+      document.getElementById("nextMonth").addEventListener("click", () => {
+        dataAtual.setMonth(dataAtual.getMonth() + 1);
+        renderizarCalendario();
+      });
+
+      // ========= INICIALIZA =========
+      renderizarCalendario();
+
+      // 🔹 Seleciona automaticamente o dia atual (respeitando fuso horário local)
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+      const dataHoje = `${ano}-${mes}-${dia}`;
+
+      const agendamentosHoje = agendamentos.filter(a => {
+        if (!a?.data) return false;
+        const dataAgendamento = a.data.split("T")[0];
+        return dataAgendamento === dataHoje && a.status !== "cancelado";
+      });
+
+      setTimeout(() => selecionarData(dataHoje, agendamentosHoje), 150);
+    });
+  </script>
+</body>
+
+</html>

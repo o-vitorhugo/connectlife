@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./dashboard.html">Dashboard</a></li>
+          <li><a href="./atividades.html">Atividades</a></li>
+          <li><a href="./agendamentos.html">Agendamentos</a></li>
+          <li><a href="./calendario.html">Calendário</a></li>
+          <li><a href="./historico.html">Histórico</a></li>
+          <li><a id="active" href="./eventos.html">Eventos</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem; min-height: 39.5vh;">
+    <div class="container">
+      <div class="flex-between" style="margin-bottom: 2rem;">
+        <h1>Eventos Comunitários</h1>
+        <div id="managerActions"></div>
+      </div>
+
+      <div class="grid grid-cols-3" id="eventsGrid">
+         Events will be populated by JavaScript 
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        // 1️⃣ Obtém o usuário atual (se existir)
+        const usuario = API.usuarios.obterUsuarioAtual();
+
+        // 2️⃣ Se for voluntário → mostra botão de gerenciamento
+        if (usuario && usuario.papel === "VOLUNTARIO") {
+          document.getElementById("managerActions").innerHTML = `
+          <a href="./gerenciar-eventos.html" class="btn btn-primary">Gerenciar Eventos</a>
+        `;
+        }
+
+        // 3️⃣ Busca os eventos do servidor
+        const eventos = await API.eventos.listar();
+        const gradeEventos = document.getElementById("eventsGrid");
+
+        if (!Array.isArray(eventos) || eventos.length === 0) {
+          gradeEventos.innerHTML = `
+          <p class="text-muted" style="grid-column: 1 / -1; text-align: center;">
+            Nenhum evento disponível no momento.
+          </p>
+        `;
+          return;
+        }
+
+        let inscricoes = {};
+        if (usuario && usuario.papel === "IDOSO") {
+          for (const evento of eventos) {
+            try {
+              const resultado = await API.eventos.verificarInscricao(evento.id);
+              inscricoes[evento.id] = resultado.inscrito;
+            } catch (erro) {
+              console.warn(`[Eventos] Erro ao verificar inscrição do evento ${evento.id}:`, erro);
+              inscricoes[evento.id] = false;
+            }
+          }
+        }
+
+        // 4️⃣ Renderiza os cards de eventos
+        gradeEventos.innerHTML = eventos.map(evento => {
+          const vagasRestantes = evento.capacidade - (evento.inscritos || 0);
+          const estaLotado = vagasRestantes <= 0;
+          const estaInscrito = inscricoes[evento.id] || false;
+
+          return `
+          <div class="card">
+            <img src="${evento.imagem || '/festa-junina-community.jpg'}" alt="${evento.titulo}" 
+                 style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: 1rem;">
+            <h3 style="margin-bottom: 0.5rem;">${evento.titulo}</h3>
+            <p class="text-muted" style="margin-bottom: 1rem;">${evento.descricao}</p>
+
+            <div style="margin-bottom: 1rem;">
+              <p style="font-size: 0.875rem;"><strong>📅 Data:</strong> ${formatarData(evento.data)} às ${evento.hora || "N/D"}</p>
+              <p style="font-size: 0.875rem;"><strong>📍 Local:</strong> ${evento.local || "Não informado"}</p>
+              <p style="font-size: 0.875rem;"><strong>👥 Vagas:</strong> ${vagasRestantes} de ${evento.capacidade}</p>
+              <p style="font-size: 0.875rem;"><strong>👤 Organizador:</strong> ${evento.organizador || "Não informado"}</p>
+            </div>
+
+            ${usuario && usuario.papel === "IDOSO" ? `
+              ${estaInscrito ? `
+                <button 
+                  onclick="cancelarInscricaoEvento(${evento.id})" 
+                  class="btn btn-danger" 
+                  style="width: 100%;">
+                  Inscrito - Cancelar Inscrição
+                </button>
+              ` : `
+                <button 
+                  onclick="inscreverNoEvento(${evento.id})" 
+                  class="btn btn-primary" 
+                  style="width: 100%;" 
+                  ${estaLotado ? "disabled" : ""}>
+                  ${estaLotado ? "Evento Lotado" : "Inscrever-se"}
+                </button>
+              `}
+            ` : usuario && usuario.papel === "VOLUNTARIO" ? `
+              <p class="text-muted" style="text-align: center; font-size: 0.875rem;">
+                Apenas idosos podem participar de eventos
+              </p>
+            ` : `
+              <a href="./login.html" class="btn btn-primary" 
+                 style="width: 100%; text-align: center; display: block;">
+                Entrar para Inscrever-se
+              </a>
+            `}
+          </div>
+        `;
+        }).join("");
+
+        window.inscreverNoEvento = async function (idEvento) {
+          try {
+            const evento = eventos.find(e => e.id === idEvento);
+            if (!evento) {
+              showAlert("Evento não encontrado.", "error");
+              return;
+            }
+
+            const vagasRestantes = evento.capacidade - (evento.inscritos || 0);
+            if (vagasRestantes <= 0) {
+              showAlert("Desculpe, este evento está lotado.", "warning");
+              return;
+            }
+
+            await API.eventos.participar(idEvento);
+            showAlert("Inscrição realizada com sucesso!", "success");
+
+            setTimeout(() => location.reload(), 1500);
+          } catch (erro) {
+            console.error("[Eventos] Erro ao inscrever:", erro);
+            showAlert(erro.message || "Erro ao realizar inscrição. Tente novamente.", "error");
+          }
+        };
+
+        window.cancelarInscricaoEvento = async function (idEvento) {
+          try {
+            if (!confirm("Tem certeza que deseja cancelar sua inscrição neste evento?")) {
+              return;
+            }
+
+            await API.eventos.cancelarInscricao(idEvento);
+            showAlert("Inscrição cancelada com sucesso!", "success");
+
+            setTimeout(() => location.reload(), 1500);
+          } catch (erro) {
+            console.error("[Eventos] Erro ao cancelar inscrição:", erro);
+            showAlert(erro.message || "Erro ao cancelar inscrição. Tente novamente.", "error");
+          }
+        };
+
+        // 6️⃣ Função auxiliar de formatação de data (caso não exista)
+        function formatarData(dataISO) {
+          if (!dataISO) return "Data inválida";
+          const data = new Date(dataISO);
+          return data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+        }
+
+        
+
+      } catch (erro) {
+        console.error("[Eventos] Erro ao carregar:", erro);
+        const grid = document.getElementById("eventsGrid");
+        if (grid) grid.innerHTML = `<p class="text-danger">Erro ao carregar eventos.</p>`;
+      }
+    });
+  </script>
+
+</body>
+
+</html>

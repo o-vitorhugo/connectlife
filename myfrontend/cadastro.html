@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Início</a></li>
+          <li><a href="./login.html">Entrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main style="padding: 4rem 1rem;">
+    <div class="container" style="max-width: 600px;">
+      <div class="card">
+        <div class="card-header text-center">
+          <h1 class="card-title">Crie Sua Conta</h1>
+          <p class="card-description">Junte-se à nossa comunidade</p>
+        </div>
+
+        <form id="register-form">
+          <div class="form-group">
+            <label for="role">Você é:</label>
+            <select id="role" name="role" required>
+              <option value="">Selecione...</option>
+              <option value="idoso">Idoso</option>
+              <option value="voluntario">Voluntário</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="name">Nome Completo</label>
+            <input type="text" id="name" name="name" required placeholder="Seu nome completo">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="seu@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" required placeholder="Mínimo 6 caracteres"
+              minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Telefone</label>
+            <input type="tel" id="phone" name="phone" required placeholder="(11) 98765-4321">
+          </div>
+
+          <div class="form-group">
+            <label for="age">Idade</label>
+            <input type="number" id="age" name="age" required placeholder="Sua idade" min="18">
+          </div>
+
+          <div id="elderly-fields" style="display: none;">
+            <div class="form-group">
+              <label for="address">Endereço</label>
+              <input type="text" id="address" name="address" placeholder="Cidade, Estado">
+            </div>
+          </div>
+
+          <div id="volunteer-fields" style="display: none;">
+            <div class="form-group">
+              <label for="skills">Habilidades (separadas por vírgula)</label>
+              <input type="text" id="skills" name="skills" placeholder="Ex: Caminhada, Leitura, Música">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Cadastrar</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <p class="text-muted">Já tem uma conta? <a href="./login.html"
+              style="color: var(--color-primary); font-weight: 600;">Entrar</a></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
+
+  <script>
+    const seletorPapel = document.getElementById('role');
+    const camposIdoso = document.getElementById('elderly-fields');
+    const camposVoluntario = document.getElementById('volunteer-fields');
+
+    seletorPapel.addEventListener('change', (e) => {
+      if (e.target.value === 'idoso') {
+        camposIdoso.style.display = 'block';
+        camposVoluntario.style.display = 'none';
+      } else if (e.target.value === 'voluntario') {
+        camposIdoso.style.display = 'none';
+        camposVoluntario.style.display = 'block';
+      } else {
+        camposIdoso.style.display = 'none';
+        camposVoluntario.style.display = 'none';
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async(e) => {
+      e.preventDefault();
+
+      const dadosFormulario = new FormData(e.target);
+      const dadosUsuario = {
+        nome: dadosFormulario.get('name'),
+        email: dadosFormulario.get('email'),
+        senha: dadosFormulario.get('password'),
+        telefone: dadosFormulario.get('phone'),
+        idade: parseInt(dadosFormulario.get('age')),
+        papel: dadosFormulario.get('role')  
+      };
+
+      if (dadosUsuario.papel === 'idoso') {
+        dadosUsuario.endereco = dadosFormulario.get('address');
+      } else if (dadosUsuario.papel === 'voluntario') {
+        const stringHabilidades = dadosFormulario.get('skills');
+        dadosUsuario.habilidades = stringHabilidades ? stringHabilidades.split(',').map(h => h.trim()) : [];
+      }
+
+      try {
+      // Aguarda o resultado do cadastro
+      const resultado = await API.usuarios.cadastrar(dadosUsuario);
+
+      if (resultado) {
+        showAlert('Cadastro realizado com sucesso! Entrando...', 'success');
+
+        // Faz login automaticamente com os dados cadastrados
+        const login = await API.usuarios.entrar(dadosUsuario.email, dadosUsuario.senha);
+
+        if (login && login.token) {
+          // Salva no localStorage
+          localStorage.setItem('token', login.token);
+          localStorage.setItem('usuario', JSON.stringify(login.usuario));
+
+          // Redireciona para o dashboard
+          setTimeout(() => {
+            window.location.href = './dashboard.html';
+          }, 1200);
+        } else {
+          showAlert('Cadastro feito, mas falha ao entrar automaticamente.', 'error');
+        }
+      } else {
+        showAlert('Erro ao realizar cadastro.', 'error');
+      }
+    } catch (erro) {
+      console.error('Erro no cadastro:', erro);
+      showAlert('Erro ao tentar cadastrar. Tente novamente.', 'error');
+    }
+  });
+  </script>
+</body>
+
+</html>

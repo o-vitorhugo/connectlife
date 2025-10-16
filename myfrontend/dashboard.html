@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a id="active" href="./dashboard.html">Dashboard</a></li>
+          <li><a href="./atividades.html">Atividades</a></li>
+          <li><a href="./agendamentos.html">Agendamentos</a></li>
+          <li><a href="./calendario.html">Calendário</a></li>
+          <li><a href="./historico.html">Histórico</a></li>
+          <li><a href="./eventos.html">Eventos</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem;">
+    <div class="container">
+      <h1 style="margin-bottom: 2rem;">Meu Dashboard</h1>
+
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <div class="grid grid-cols-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Próximos Agendamentos</h2>
+          </div>
+          <div id="upcoming-schedules"></div>
+          <a href="./agendamentos.html" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Ver Todos</a>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Ações Rápidas</h2>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a href="./atividades.html" class="btn btn-primary">Explorar Atividades</a>
+            <a href="./calendario.html" class="btn btn-secondary">Ver Calendário</a>
+            <a href="./eventos.html" class="btn btn-outline">Eventos Comunitários</a>
+            <a href="./historico.html" class="btn btn-outline">Meu Histórico</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        // 1️⃣ — Verifica autenticação
+        if (!API.usuarios.requerAutenticacao()) {
+          return; // redireciona automaticamente para login
+        }
+
+        // 2️⃣ — Obtém usuário logado do localStorage
+        const usuario = API.usuarios.obterUsuarioAtual();
+        const papel = usuario.papel?.toUpperCase()?.trim();
+
+        console.log(papel)
+
+        // 3️⃣ — Busca dados reais do servidor
+        const [atividades, calendario] = await Promise.all([
+          API.atividades.listar(),   // GET /atividades
+          API.calendario.obter(),    // GET /calendario (agendamentos)
+        ]);
+
+        // 4️⃣ — Garante que os dados são arrays
+        const listaAtividades = Array.isArray(atividades) ? atividades : [];
+        const listaCalendario = Array.isArray(calendario) ? calendario : [];
+
+        if (!Array.isArray(calendario)) {
+          console.warn("[Dashboard] API /agendamentos não retornou um array:", calendario);
+        }
+
+        // 5️⃣ — Filtra agendamentos conforme o papel
+        let agendamentos = [];
+
+        if (papel === "IDOSO") {
+          agendamentos = listaCalendario.filter(a => a.id_idoso === usuario.id);
+        } else if (papel === "VOLUNTARIO") {
+          agendamentos = listaCalendario.filter(a => a.id_voluntario === usuario.id);
+        } else if (papel === "ADMIN") {
+          agendamentos = listaCalendario;
+        } else {
+          console.warn("Papel de usuário desconhecido:", usuario.papel);
+        }
+
+        console.log("Agendamentos filtrados:", agendamentos);
+
+        // 6️⃣ — Calcula estatísticas
+        const contagemConfirmados = agendamentos.filter(a => a.status === "confirmado").length;
+        const contagemPendentes = agendamentos.filter(a => a.status === "pendente").length;
+        const contagemConcluidos = agendamentos.filter(a => a.status === "concluido").length;
+
+        // 7️⃣ — Renderiza cards de estatísticas
+        const gradeEstatisticas = document.getElementById("stats-grid");
+        gradeEstatisticas.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${contagemConfirmados}</div>
+          <div class="stat-label">Confirmados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${contagemPendentes}</div>
+          <div class="stat-label">Pendentes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${contagemConcluidos}</div>
+          <div class="stat-label">Concluídos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${listaAtividades.length}</div>
+          <div class="stat-label">Atividades Disponíveis</div>
+        </div>
+      `;
+
+        // 8️⃣ — Seleciona próximos agendamentos (pendentes ou confirmados)
+        const agendamentosProximos = agendamentos
+          .filter(a => ["confirmado", "pendente"].includes(a.status))
+          .sort((a, b) => new Date(a.data) - new Date(b.data))
+          .slice(0, 3);
+
+        const containerProximos = document.getElementById("upcoming-schedules");
+
+        // 9️⃣ — Exibe próximos agendamentos
+        if (agendamentosProximos.length === 0) {
+          containerProximos.innerHTML = `
+          <p class="text-muted">Nenhum agendamento próximo</p>
+        `;
+        } else {
+          containerProximos.innerHTML = agendamentosProximos
+            .map((agendamento) => {
+              const atividade = listaAtividades.find(a => a.id === agendamento.id_atividade);
+              const classeStatus = agendamento.status === "confirmado" ? "success" : "warning";
+              const textoStatus = agendamento.status === "confirmado" ? "Confirmado" : "Pendente";
+
+              return `
+              <div style="padding: 1rem; border-bottom: 1px solid var(--color-border);">
+                <div class="flex-between">
+                  <strong>${atividade ? atividade.titulo : "Atividade"}</strong>
+                  <span class="badge badge-${classeStatus}">${textoStatus}</span>
+                </div>
+                <p class="text-muted" style="margin-top: 0.5rem;">
+                  ${formatarData(agendamento.data)} às ${agendamento.hora || ""}
+                </p>
+              </div>
+            `;
+            })
+            .join("");
+        }
+      } catch (erro) {
+        console.error("[Dashboard] Erro ao carregar dados:", erro);
+        const grid = document.getElementById("stats-grid");
+        if (grid) {
+          grid.innerHTML = `
+          <p class="text-danger">Erro ao carregar dados. Verifique sua conexão com a API.</p>
+        `;
+        }
+      }
+    });
+  </script>
+
+  <script>
+    // Função auxiliar para formatar datas (aaaa-mm-dd → dd/mm/aaaa)
+    function formatarData(dataISO) {
+      if (!dataISO) return "";
+      const data = new Date(dataISO);
+      if (isNaN(data)) return dataISO; // caso não seja uma data válida
+      return data.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar Eventos - Connect Life</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./dashboard.html">Dashboard</a></li>
+          <li><a href="./atividades.html">Atividades</a></li>
+          <li><a href="./agendamentos.html">Agendamentos</a></li>
+          <li><a href="./calendario.html">Calendário</a></li>
+          <li><a href="./historico.html">Histórico</a></li>
+          <li><a id="active" href="./eventos.html">Eventos</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem;">
+    <div class="container">
+      <h1 style="margin-bottom: 2rem;">Gerenciar Eventos</h1>
+
+      <div class="grid grid-cols-2">
+        <div class="card">
+          <h2 class="card-title" style="margin-bottom: 1.5rem;" id="formTitle">Criar Novo Evento</h2>
+          <form id="eventForm">
+            <input type="hidden" id="eventId" name="eventId">
+
+            <div class="form-group">
+              <label for="title">Título do Evento</label>
+              <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Descrição</label>
+              <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="date">Data</label>
+              <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+              <label for="time">Horário</label>
+              <input type="time" id="time" name="time" required>
+            </div>
+
+            <div class="form-group">
+              <label for="location">Local</label>
+              <input type="text" id="location" name="location" required>
+            </div>
+
+            <div class="form-group">
+              <label for="capacity">Capacidade</label>
+              <input type="number" id="capacity" name="capacity" required min="1">
+            </div>
+
+            <!-- Added organizer field
+            <div class="form-group">
+              <label for="organizer">Organizador</label>
+              <input type="text" id="organizer" name="organizer" required>
+            </div> -->
+
+            <div class="form-group">
+              <label for="image">URL da Imagem</label>
+              <input type="text" id="image" name="image" placeholder="/festa-junina-community.jpg">
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+              <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Evento</button>
+              <button type="button" onclick="resetForm()" class="btn btn-outline" style="flex: 1;">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <h2 class="card-title" style="margin-bottom: 1.5rem;">Eventos Cadastrados</h2>
+          <div id="eventsList">
+            <!-- Events will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
+
+  <script>
+    if (!API.usuarios.requerAutenticacao()) {
+      // Redirecionamento já tratado
+    } else {
+      const usuario = API.usuarios.obterUsuarioAtual();
+
+      if (usuario.papel === 'IDOSO') {
+        alert('Acesso negado. Apenas voluntários e gerentes podem criar eventos.');
+        window.location.href = './dashboard.html';
+      } else {
+        let idEventoEditando = null;
+
+        // 🧭 Renderiza lista de eventos
+        async function renderizarListaEventos() {
+          let eventos = await API.eventos.listar(); // ✅ Espera o fetch
+
+          if (!Array.isArray(eventos)) {
+            eventos = eventos ? [eventos] : [];
+          }
+
+          const listaEventos = document.getElementById('eventsList');
+
+          if (eventos.length === 0) {
+            listaEventos.innerHTML = '<p class="text-muted">Nenhum evento cadastrado ainda</p>';
+            return;
+          }
+
+          listaEventos.innerHTML = eventos.map(evento => {
+            const podeEditarOuExcluir = evento.usuarioId === usuario.id;
+
+            return `
+              <div class="card" style="margin-bottom: 1rem;">
+                <h3>${evento.titulo}</h3>
+                <p class="text-muted">${evento.descricao}</p>
+                <p><strong>Data:</strong> ${evento.data} às ${evento.hora}</p>
+                <p><strong>Local:</strong> ${evento.local}</p>
+                <p><strong>Inscritos:</strong> ${evento.inscritos}/${evento.capacidade}</p>
+                <p><strong>Organizador:</strong> ${evento.organizador || 'Não informado'}</p>
+                ${podeEditarOuExcluir ? `
+                  <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+                    <button onclick="editarEvento(${evento.id})" class="btn btn-outline">Editar</button>
+                    <button onclick="confirmarExclusaoEvento(${evento.id})" class="btn btn-danger">Excluir</button>
+                  </div>` : ''
+                }
+              </div>
+            `;
+          }).join('');
+        }
+
+        // 🧩 Buscar e preencher evento no formulário
+        window.editarEvento = async function (id) {
+          const evento = await API.eventos.obter(id); // ✅ Usa GET, não PUT
+          idEventoEditando = id;
+
+          document.getElementById('formTitle').textContent = 'Editar Evento';
+          document.getElementById('eventId').value = id;
+          document.getElementById('title').value = evento.titulo;
+          document.getElementById('description').value = evento.descricao;
+          document.getElementById('date').value = evento.data;
+          document.getElementById('time').value = evento.hora;
+          document.getElementById('location').value = evento.local;
+          document.getElementById('capacity').value = evento.capacidade;
+          document.getElementById('image').value = evento.imagem || '';
+
+          document.getElementById('eventForm').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // 🗑️ Excluir evento
+        window.confirmarExclusaoEvento = async function (id) {
+          if (confirm('Tem certeza que deseja excluir este evento?')) {
+            await API.eventos.cancelar(id); // ✅ Usa DELETE da API
+            await renderizarListaEventos();
+            alert('Evento excluído com sucesso!');
+          }
+        };
+
+        // 🔄 Resetar formulário
+        window.resetForm = function () {
+          idEventoEditando = null;
+          document.getElementById('formTitle').textContent = 'Criar Novo Evento';
+          document.getElementById('eventForm').reset();
+          document.getElementById('eventId').value = '';
+        };
+
+        // 💾 Criar / atualizar evento
+        document.getElementById('eventForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const dadosFormulario = new FormData(e.target);
+
+          const dadosEvento = {
+            titulo: dadosFormulario.get('title'),
+            descricao: dadosFormulario.get('description'),
+            data: dadosFormulario.get('date'),
+            hora: dadosFormulario.get('time'),
+            local: dadosFormulario.get('location'),
+            capacidade: parseInt(dadosFormulario.get('capacity')),
+            organizador: usuario.nome,
+            usuarioId: usuario.id,
+            imagem: dadosFormulario.get('image') || '/festa-junina-community.jpg',
+          };
+
+          if (idEventoEditando) {
+            await API.eventos.editar(idEventoEditando, dadosEvento); // ✅ PUT
+            alert('Evento atualizado com sucesso!');
+          } else {
+            await API.eventos.criar(dadosEvento); // ✅ POST
+            alert('Evento criado com sucesso!');
+          }
+
+          resetForm();
+          await renderizarListaEventos();
+        });
+
+        // 🚀 Inicializa lista
+        renderizarListaEventos();
+      }
+    }
+  </script>
+
+</body>
+
+</html>

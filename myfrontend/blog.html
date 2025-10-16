@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog - Connect Life</title>
+  <link rel="stylesheet" href="./styles/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Início</a></li>
+          <li><a href="./quem-somos.html">Quem Somos</a></li>
+          <li><a href="./nossa-missao.html">Nossa Missão</a></li>
+          <li><a id="active" href="./blog.html">Blog</a></li>
+          <li><a href="./faq.html">FAQ</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <div id="auth-links" style="display: flex; gap: 1rem;">
+          <a href="./login.html" class="btn btn-outline">Entrar</a>
+          <a href="./cadastro.html" class="btn btn-primary">Cadastre-se</a>
+        </div>
+        <div id="user-menu" style="display: none; align-items: center; gap: 1rem;">
+          <span id="user-name"></span>
+          <span id="user-role" class="role-badge"></span>
+          <a href="./dashboard.html" class="btn btn-primary">Dashboard</a>
+          <button id="logout-btn" class="btn btn-outline">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Blog</h1>
+        <p>Histórias, dicas e novidades sobre envelhecimento ativo</p>
+      </div>
+    </section>
+
+    <section class="container" style="margin-top: 4rem;">
+      <div class="card-grid" id="blogPosts">
+        Blog posts will be populated by JavaScript
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--primary);">Conexão Gerações</h3>
+          <p>Conectando idosos e voluntários para uma vida mais plena e significativa.</p>
+        </div>
+        <div>
+          <h4>Links Rápidos</h4>
+          <ul style="list-style: none;">
+            <li><a href="./quem-somos.html" style="color: white;">Quem Somos</a></li>
+            <li><a href="./nossa-missao.html" style="color: white;">Nossa Missão</a></li>
+            <li><a href="./beneficios.html" style="color: white;">Benefícios</a></li>
+            <li><a href="./faq.html" style="color: white;">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contato</h4>
+          <p>Email: contato@conexaogeracoes.com.br</p>
+          <p>Telefone: (11) 1234-5678</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Conexão Gerações. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./js/app.js"></script>
+
+  <script>
+    const postsBlog = obterPostsBlog();
+    const containerPostsBlog = document.getElementById('blogPosts');
+
+    containerPostsBlog.innerHTML = postsBlog.map(post => `
+      <div class="card">
+        <span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--primary); color: white; border-radius: 20px; font-size: 0.875rem; margin-bottom: 1rem;">${post.categoria}</span>
+        <h3 style="margin-bottom: 0.5rem;">${post.titulo}</h3>
+        <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-bottom: 1rem;">
+          Por ${post.autor} • ${formatarData(post.data)}
+        </p>
+        <p style="color: var(--muted-foreground); margin-bottom: 1.5rem;">${post.resumo}</p>
+        <a href="./blog-post.html?id=${post.id}" class="btn btn-outline">Ler Mais</a>
+      </div>
+    `).join('');
+  </script>
+</body>
+
+</html>

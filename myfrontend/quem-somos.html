@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quem Somos - Connect Life</title>
+  <link rel="stylesheet" href="./styles/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Início</a></li>
+          <li><a id="active" href="./quem-somos.html">Quem Somos</a></li>
+          <li><a href="./nossa-missao.html">Nossa Missão</a></li>
+          <li><a href="./blog.html">Blog</a></li>
+          <li><a href="./faq.html">FAQ</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <div id="auth-links" style="display: flex; gap: 1rem;">
+          <a href="./login.html" class="btn btn-outline">Entrar</a>
+          <a href="./cadastro.html" class="btn btn-primary">Cadastre-se</a>
+        </div>
+        <div id="user-menu" style="display: none; align-items: center; gap: 1rem;">
+          <span id="user-name"></span>
+          <span id="user-role" class="role-badge"></span>
+          <a href="./dashboard.html" class="btn btn-primary">Dashboard</a>
+          <button id="logout-btn" class="btn btn-outline">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Quem Somos</h1>
+        <p>Conectando gerações através do cuidado e da solidariedade</p>
+      </div>
+    </section>
+
+    <section class="container" style="margin-top: 4rem;">
+      <div style="max-width: 800px; margin: 0 auto;">
+        <h2 class="mb-2">Nossa História</h2>
+        <p style="font-size: 1.125rem; line-height: 1.8; color: var(--muted-foreground); margin-bottom: 2rem;">
+          A Conexão Gerações nasceu da percepção de que muitos idosos enfrentam solidão e isolamento social,
+          enquanto jovens e adultos buscam formas significativas de contribuir para a comunidade.
+          Criamos uma ponte entre essas duas realidades, promovendo encontros que enriquecem a vida de todos os
+          envolvidos.
+        </p>
+
+        <h2 class="mb-2">O Que Fazemos</h2>
+        <p style="font-size: 1.125rem; line-height: 1.8; color: var(--muted-foreground); margin-bottom: 2rem;">
+          Organizamos e facilitamos atividades que conectam idosos e voluntários em experiências significativas.
+          Desde caminhadas no parque até clubes de leitura, artesanato e jogos, cada atividade é pensada para
+          promover o bem-estar, a socialização e a troca de experiências entre gerações.
+        </p>
+
+        <h2 class="mb-2">Nossa Equipe</h2>
+        <div class="card-grid" style="margin-top: 2rem;">
+          <div class="card text-center">
+            <div
+              style="width: 100px; height: 100px; background-color: var(--primary); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+              👨‍💼</div>
+            <h3>Carlos Silva</h3>
+            <p style="color: var(--primary); font-weight: 600;">Fundador</p>
+            <p style="color: var(--muted-foreground);">Assistente social com 15 anos de experiência</p>
+          </div>
+          <div class="card text-center">
+            <div
+              style="width: 100px; height: 100px; background-color: var(--primary); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+              👩‍⚕️</div>
+            <h3>Dra. Ana Costa</h3>
+            <p style="color: var(--primary); font-weight: 600;">Coordenadora</p>
+            <p style="color: var(--muted-foreground);">Gerontóloga especializada em envelhecimento ativo</p>
+          </div>
+          <div class="card text-center">
+            <div
+              style="width: 100px; height: 100px; background-color: var(--primary); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+              👨‍💻</div>
+            <h3>Pedro Santos</h3>
+            <p style="color: var(--primary); font-weight: 600;">Gerente de Voluntários</p>
+            <p style="color: var(--muted-foreground);">Psicólogo e coordenador de programas sociais</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--primary);">Conexão Gerações</h3>
+          <p>Conectando idosos e voluntários para uma vida mais plena e significativa.</p>
+        </div>
+        <div>
+          <h4>Links Rápidos</h4>
+          <ul style="list-style: none;">
+            <li><a href="./quem-somos.html" style="color: white;">Quem Somos</a></li>
+            <li><a href="./nossa-missao.html" style="color: white;">Nossa Missão</a></li>
+            <li><a href="./beneficios.html" style="color: white;">Benefícios</a></li>
+            <li><a href="./faq.html" style="color: white;">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contato</h4>
+          <p>Email: contato@conexaogeracoes.com.br</p>
+          <p>Telefone: (11) 1234-5678</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Conexão Gerações. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./js/app.js"></script>
+</body>
+
+</html>
