@@ -50,7 +50,7 @@ const MOCK_DATA = {
       category: "Exercício Físico",
       duration: "60 minutos",
       difficulty: "Fácil",
-      image: "/elderly-walking-in-park.jpg",
+      image: "./images/elderly-walking-in-park.jpg",
     },
     {
       id: 2,
@@ -59,7 +59,7 @@ const MOCK_DATA = {
       category: "Cultural",
       duration: "90 minutos",
       difficulty: "Fácil",
-      image: "/book-club-elderly.jpg",
+      image: "./images/book-club-elderly.jpg",
     },
     {
       id: 3,
@@ -68,7 +68,7 @@ const MOCK_DATA = {
       category: "Artesanato",
       duration: "120 minutos",
       difficulty: "Médio",
-      image: "/elderly-crafts-knitting.jpg",
+      image: "./images/elderly-crafts-knitting.jpg",
     },
     {
       id: 4,
@@ -77,7 +77,7 @@ const MOCK_DATA = {
       category: "Lazer",
       duration: "90 minutos",
       difficulty: "Fácil",
-      image: "/elderly-playing-chess.jpg",
+      image: "./images/elderly-playing-chess.jpg",
     },
     {
       id: 5,
@@ -86,7 +86,7 @@ const MOCK_DATA = {
       category: "Cultural",
       duration: "60 minutos",
       difficulty: "Fácil",
-      image: "/elderly-music-session.jpg",
+      image: "./images/elderly-music-session.jpg",
     },
   ],
   schedules: [

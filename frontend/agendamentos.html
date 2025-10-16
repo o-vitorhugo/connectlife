@@ -84,10 +84,11 @@
 
       // ==============================
       // 📦 Busca dados da API
-      // ==============================
       let agendamentos = await API.calendario.obterAgendamentosUsuario(usuario.id);
       let atividades = await API.atividades.obterAtividadesUsuario(usuario.id);
       const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
+
+
 
       if (!Array.isArray(agendamentos)) agendamentos = [agendamentos];
       if (!Array.isArray(atividades)) atividades = [atividades];
@@ -155,7 +156,9 @@
                   <p><strong>Data:</strong> ${formatarData(agendamento.data)}</p>
                   <p><strong>Horário:</strong> ${agendamento.hora}</p>
                   <p><strong>${usuario.papel === "IDOSO" ? "Voluntário" : "Idoso"}:</strong>
-                    ${participante ? participante.nome : "N/A"}
+                    ${participante ? participante.nome : "<em>Aguardando voluntário</em>"}
+                  </p>
+
                   </p>
                 </div>
                 <div>
@@ -171,8 +174,11 @@
               : ""}
                 
                 ${["confirmado", "pendente"].includes(status)
-              ? `<button class="btn btn-danger" onclick="cancelarAgendamento(${agendamento.id})">Cancelar</button>`
+              ? usuario.papel === "IDOSO"
+                ? `<button class="btn btn-danger" onclick="cancelarAgendamento(${agendamento.id})">Cancelar</button>`
+                : `<button class="btn btn-warning" onclick="desconfirmarAgendamento(${agendamento.id})">Desconfirmar</button>`
               : ""}
+
                 
                 ${status === "confirmado" && podeConcluir && usuario.papel === "VOLUNTARIO"
               ? `<button class="btn btn-primary" onclick="concluirAgendamento(${agendamento.id})">Concluir</button>`
@@ -215,6 +221,15 @@
           location.reload();
         }
       };
+
+      window.desconfirmarAgendamento = async function (id) {
+        if (confirm("Deseja realmente desconfirmar sua presença?")) {
+          await API.calendario.atualizar(id, { id_voluntario: null, status: "pendente" });
+          alert("Você desconfirmou sua presença neste agendamento.");
+          location.reload();
+        }
+      };
+
 
       window.concluirAgendamento = async function (id) {
         await API.calendario.atualizar(id, { status: "concluido" });

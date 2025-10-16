@@ -55,7 +55,7 @@ roteador.get("/", verificarToken, async (req, res) => {
     const usuarioId = req.usuario.id
 
     const where = {
-      [Op.or]: [{ id_idoso: usuarioId }, { id_voluntario: usuarioId }],
+      [Op.or]: [{ id_idoso: usuarioId }, { id_voluntario: usuarioId }, {id_voluntario: null}],
       ...(status && { status }),
     }
 
@@ -178,23 +178,52 @@ roteador.put("/:id", verificarToken, async (req, res) => {
 // ===============================
 // DELETE /api/agendamentos/:id
 // ===============================
+// ===============================
+// DELETE /api/agendamentos/:id
+// ===============================
 roteador.delete("/:id", verificarToken, async (req, res) => {
   try {
     const agendamento = await Agendamento.findByPk(req.params.id)
     if (!agendamento) return res.status(404).json({ erro: "Agendamento não encontrado" })
 
     const usuario = req.usuario
-    if (agendamento.id_idoso !== usuario.id && agendamento.id_voluntario !== usuario.id) {
-      return res.status(403).json({ erro: "Sem permissão para cancelar este agendamento" })
+    const papelUsuario = usuario.papel.toUpperCase()
+
+    // ✅ IDOSO pode cancelar o agendamento inteiro
+    if (papelUsuario === "IDOSO") {
+      if (agendamento.id_idoso !== usuario.id) {
+        return res.status(403).json({ erro: "Sem permissão para cancelar este agendamento" })
+      }
+
+      await agendamento.destroy()
+      return res.json({ mensagem: "Agendamento cancelado com sucesso pelo idoso" })
     }
 
-    await agendamento.destroy()
-    res.json({ mensagem: "Agendamento cancelado com sucesso" })
+    // ✅ VOLUNTÁRIO só pode desconfirmar presença
+    if (papelUsuario === "VOLUNTARIO") {
+      if (agendamento.id_voluntario !== usuario.id) {
+        return res.status(403).json({ erro: "Você não está inscrito neste agendamento" })
+      }
+
+      await agendamento.update({
+        id_voluntario: null,
+        status: "pendente",
+      })
+
+      return res.json({
+        mensagem: "Presença desconfirmada — o agendamento permanece disponível para outros voluntários",
+        agendamento,
+      })
+    }
+
+    // 🛑 Caso o papel não seja IDOSO nem VOLUNTARIO
+    return res.status(403).json({ erro: "Papel de usuário não autorizado para esta ação" })
   } catch (erro) {
-    console.error("Erro ao deletar agendamento:", erro)
+    console.error("Erro ao deletar/desconfirmar agendamento:", erro)
     res.status(500).json({ erro: erro.message })
   }
 })
+
 
 // ===============================
 // GET /api/agendamentos/usuario/:id
