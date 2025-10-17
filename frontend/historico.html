@@ -1,130 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Histórico - Connect Life</title>
-    <link rel="stylesheet" href="./styles/main.css" />
-  </head>
 
-  <body>
-    <header>
-      <div class="header-content">
-        <a href="./index.html" class="logo">🤝 Connect Life</a>
-        <nav>
-          <ul>
-            <li><a href="./dashboard.html">Dashboard</a></li>
-            <li><a href="./atividades.html">Atividades</a></li>
-            <li><a href="./agendamentos.html">Agendamentos</a></li>
-            <li><a href="./calendario.html">Calendário</a></li>
-            <li><a id="active" href="./historico.html">Histórico</a></li>
-            <li><a href="./eventos.html">Eventos</a></li>
-          </ul>
-        </nav>
-        <div class="user-menu">
-          <span id="user-name"></span>
-          <span id="user-role" class="role-badge"></span>
-          <button id="logout-btn" class="btn btn-outline">Sair</button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histórico - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝 Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./dashboard.html">Dashboard</a></li>
+          <li><a href="./atividades.html">Atividades</a></li>
+          <li><a href="./agendamentos.html">Agendamentos</a></li>
+          <li><a href="./calendario.html">Calendário</a></li>
+          <li><a id="active" href="./historico.html">Histórico</a></li>
+          <li><a href="./eventos.html">Eventos</a></li>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem">
+    <div class="container">
+      <h1 style="margin-bottom: 2rem">Histórico de Atividades</h1>
+
+      <div class="stats-grid" style="margin-bottom: 3rem">
+        <div class="stat-card">
+          <div class="stat-value" id="totalCompleted">0</div>
+          <div class="stat-label">Atividades Concluídas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalHours">0</div>
+          <div class="stat-label">Horas de Atividades</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="averageRating">0</div>
+          <div class="stat-label">Avaliação Média</div>
         </div>
       </div>
-    </header>
 
-    <main style="padding: 2rem 1rem">
-      <div class="container">
-        <h1 style="margin-bottom: 2rem">Histórico de Atividades</h1>
-
-        <div class="stats-grid" style="margin-bottom: 3rem">
-          <div class="stat-card">
-            <div class="stat-value" id="totalCompleted">0</div>
-            <div class="stat-label">Atividades Concluídas</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="totalHours">0</div>
-            <div class="stat-label">Horas de Atividades</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="averageRating">0</div>
-            <div class="stat-label">Avaliação Média</div>
-          </div>
-        </div>
-
-        <div id="historyList" class="history-list">
-          <p class="text-muted" style="text-align: center">Carregando histórico...</p>
-        </div>
+      <div id="historyList" class="history-list">
+        <p class="text-muted" style="text-align: center">Carregando histórico...</p>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <footer>
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>Connect Life</h3>
-          <p>Conectando gerações através de atividades significativas.</p>
-        </div>
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
       </div>
-      <div class="footer-bottom">
-        <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
-      </div>
-    </footer>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
 
-    <script src="./js/api.js"></script>
+  <script src="./js/api.js"></script>
 
-    <script src="./js/global.js"></script>
+  <script src="./js/global.js"></script>
 
-    <script>
-      async function carregarHistorico() {
-        try {
-          const usuario = JSON.parse(localStorage.getItem("usuario"))
-          if (!usuario) {
-            window.location.href = "./login.html"
-            return
-          }
+  <script>
+    async function carregarHistorico() {
+      try {
+        const usuario = JSON.parse(localStorage.getItem("usuario"))
+        if (!usuario) {
+          window.location.href = "./login.html"
+          return
+        }
 
-          const [agendamentos, avaliacoes] = await Promise.all([
-            fazerRequisicao("/agendamentos"),
-            fazerRequisicao("/avaliacoes"),
-          ])
+        const [agendamentos, avaliacoes] = await Promise.all([
+          fazerRequisicao("/agendamentos"),
+          fazerRequisicao("/avaliacoes"),
+        ])
 
-          const concluidos = agendamentos.filter((a) => a.status === "concluido")
+        const concluidos = agendamentos.filter((a) => a.status === "concluido")
 
-          document.getElementById("totalCompleted").textContent = concluidos.length
-          document.getElementById("totalHours").textContent = (concluidos.length * 1.5).toFixed(1)
+        document.getElementById("totalCompleted").textContent = concluidos.length
+        document.getElementById("totalHours").textContent = (concluidos.length * 1.5).toFixed(1)
 
-          const avaliacoesUsuario = avaliacoes.filter((av) => {
-            const agendamento = concluidos.find((a) => a.id === av.id_agendamento)
-            return !!agendamento
-          })
+        const avaliacoesUsuario = avaliacoes.filter((av) => {
+          const agendamento = concluidos.find((a) => a.id === av.id_agendamento)
+          return !!agendamento
+        })
 
-          const mediaAvaliacao =
-            avaliacoesUsuario.length > 0
-              ? (avaliacoesUsuario.reduce((soma, av) => soma + av.nota, 0) / avaliacoesUsuario.length).toFixed(1)
-              : "0"
-          document.getElementById("averageRating").textContent = mediaAvaliacao
+        const mediaAvaliacao =
+          avaliacoesUsuario.length > 0
+            ? (avaliacoesUsuario.reduce((soma, av) => soma + av.nota, 0) / avaliacoesUsuario.length).toFixed(1)
+            : "0"
+        document.getElementById("averageRating").textContent = mediaAvaliacao
 
-          const lista = document.getElementById("historyList")
-          if (concluidos.length === 0) {
-            lista.innerHTML =
-              '<p class="text-muted" style="text-align:center;padding:2rem;">Nenhuma atividade concluída ainda.</p>'
-            return
-          }
+        const lista = document.getElementById("historyList")
+        if (concluidos.length === 0) {
+          lista.innerHTML =
+            '<p class="text-muted" style="text-align:center;padding:2rem;">Nenhuma atividade concluída ainda.</p>'
+          return
+        }
 
-          lista.innerHTML = concluidos
-            .sort((a, b) => new Date(b.data) - new Date(a.data))
-            .map((a) => {
-              const atividade = a.atividade
-              const avaliacao = avaliacoes.find((av) => av.id_agendamento === a.id)
-              const idoso = a.idoso
-              const voluntario = a.voluntario
+        lista.innerHTML = concluidos
+          .sort((a, b) => new Date(b.data) - new Date(a.data))
+          .map((a) => {
+            const atividade = a.atividade
+            const avaliacao = avaliacoes.find((av) => av.id_agendamento === a.id)
+            const idoso = a.idoso
+            const voluntario = a.voluntario
 
-              return `
+            return `
             <div class="card" style="margin-bottom: 1rem;">
               <div style="display: flex; gap: 2rem; align-items: start;">
-                ${
-                  atividade?.imagem
-                    ? `
+                ${atividade?.imagem
+                ? `
                   <img src="${atividade.imagem}" alt="${atividade.titulo}" style="width:150px;height:100px;object-fit:cover;border-radius:var(--radius);">
                 `
-                    : ""
-                }
+                : ""
+              }
                 <div style="flex: 1;">
                   <h3>${atividade?.titulo || "Atividade"}</h3>
                   <p class="text-muted">${atividade?.descricao || ""}</p>
@@ -134,81 +135,80 @@
                     ${usuario.papel === "VOLUNTARIO" && idoso ? `<p><strong>Idoso:</strong> ${idoso.nome}</p>` : ""}
                     ${usuario.papel === "IDOSO" && voluntario ? `<p><strong>Voluntário:</strong> ${voluntario.nome}</p>` : ""}
                   </div>
-                  ${
-                    avaliacao
-                      ? `
+                  ${avaliacao
+                ? `
                     <div style="margin-top:1rem;padding:1rem;background:var(--color-muted);border-radius:var(--radius);">
                       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
                         <div>
                           <p style="font-weight:600;color:#16a34a;">✓ Avaliado</p>
                           <p style="font-weight:600;">Nota: ${"⭐".repeat(avaliacao.nota)}</p>
                         </div>
-                        ${
-                          usuario.papel === "IDOSO" && avaliacao.id_idoso === usuario.id
-                            ? `<button onclick="editarAvaliacao(${avaliacao.id})" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.875rem;">Editar</button>`
-                            : ""
-                        }
+                        ${usuario.papel === "IDOSO" && avaliacao.id_idoso === usuario.id
+                  ? `<button onclick="editarAvaliacao(${avaliacao.id})" class="btn btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.875rem;">Editar</button>`
+                  : ""
+                }
                       </div>
                       ${avaliacao.comentario ? `<p style="font-size:0.875rem;">"${avaliacao.comentario}"</p>` : ""}
                     </div>
                   `
-                      : usuario.papel === "IDOSO"
-                        ? `
+                : usuario.papel === "IDOSO"
+                  ? `
                     <a href="./avaliar.html?id=${a.id}" class="btn btn-primary" style="margin-top:1rem;">Avaliar Atividade</a>
                   `
-                        : ""
-                  }
+                  : ""
+              }
                 </div>
               </div>
             </div>
           `
-            })
-            .join("")
-        } catch (erro) {
-          console.error(erro)
-          document.getElementById("historyList").innerHTML = `
+          })
+          .join("")
+      } catch (erro) {
+        console.error(erro)
+        document.getElementById("historyList").innerHTML = `
         <p class="text-error" style="text-align:center;padding:2rem;">
           Erro ao carregar histórico. Tente novamente mais tarde.
         </p>`
-        }
+      }
+    }
+
+    window.editarAvaliacao = function (id) {
+      const nota = prompt("Digite a nova nota (1-5):")
+      if (!nota || isNaN(nota) || nota < 1 || nota > 5) {
+        alert("Nota inválida. Digite um número entre 1 e 5.")
+        return
       }
 
-      window.editarAvaliacao = function (id) {
-        const nota = prompt("Digite a nova nota (1-5):")
-        if (!nota || isNaN(nota) || nota < 1 || nota > 5) {
-          alert("Nota inválida. Digite um número entre 1 e 5.")
-          return
-        }
+      const comentario = prompt("Digite o novo comentário (opcional):")
 
-        const comentario = prompt("Digite o novo comentário (opcional):")
-
-        fazerRequisicao(`/avaliacoes/${id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            nota: parseInt(nota),
-            comentario: comentario || "",
-          }),
+      fazerRequisicao(`/avaliacoes/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          nota: parseInt(nota),
+          comentario: comentario || "",
+        }),
+      })
+        .then(() => {
+          alert("Avaliação atualizada com sucesso!")
+          location.reload()
         })
-          .then(() => {
-            alert("Avaliação atualizada com sucesso!")
-            location.reload()
-          })
-          .catch((erro) => {
-            console.error(erro)
-            alert("Erro ao atualizar avaliação.")
-          })
-      }
-
-      function formatarData(dataStr) {
-        if (!dataStr) return "N/A"
-        const data = new Date(dataStr)
-        return data.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
+        .catch((erro) => {
+          console.error(erro)
+          alert("Erro ao atualizar avaliação.")
         })
-      }
-      carregarHistorico()
-    </script>
-  </body>
+    }
+
+    function formatarData(dataStr) {
+      if (!dataStr) return "N/A"
+      const data = new Date(dataStr)
+      return data.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    }
+    carregarHistorico()
+  </script>
+</body>
+
 </html>

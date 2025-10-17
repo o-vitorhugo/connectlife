@@ -4,23 +4,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seja Voluntário - Conexão Gerações</title>
+  <title>Seja Voluntário - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/styles.css">
 </head>
 
 <body>
   <header>
-    <div class="container header-content">
-      <a href="/public/index.html" class="logo">🤝 Conexão Gerações</a>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝Connect Life</a>
       <nav>
         <ul>
           <li><a href="./index.html">Início</a></li>
           <li><a href="./quem-somos.html">Quem Somos</a></li>
-          <li><a href="./seja-voluntario.html">Seja Voluntário</a></li>
-          <li><a href="./beneficios.html">Benefícios</a></li>
-          <li><a href="./login.html" class="btn btn-primary">Entrar</a></li>
+          <li><a href="./nossa-missao.html">Nossa Missão</a></li>
+          <li><a id="active" href="./seja-voluntario.html">Seja Voluntário</a></li>
+          <li><a href="./blog.html">Blog</a></li>
+          <li><a href="./faq.html">FAQ</a></li>
         </ul>
       </nav>
+      <div class="user-menu">
+        <div id="auth-links" style="display: flex; gap: 1rem;">
+          <a href="./login.html" class="btn btn-outline">Entrar</a>
+          <a href="./cadastro.html" class="btn btn-primary">Cadastre-se</a>
+        </div>
+        <div id="user-menu" style="display: none; align-items: center; gap: 1rem;">
+          <span id="user-name"></span>
+          <span id="user-role" class="role-badge"></span>
+          <a href="./dashboard.html" class="btn btn-primary">Dashboard</a>
+          <button id="logout-btn" class="btn btn-outline">Sair</button>
+        </div>
+      </div>
     </div>
   </header>
 

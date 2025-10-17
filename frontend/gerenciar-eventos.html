@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerenciar Eventos - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
 
@@ -70,12 +71,6 @@
               <input type="number" id="capacity" name="capacity" required min="1">
             </div>
 
-            <!-- Added organizer field
-            <div class="form-group">
-              <label for="organizer">Organizador</label>
-              <input type="text" id="organizer" name="organizer" required>
-            </div> -->
-
             <div class="form-group">
               <label for="image">URL da Imagem</label>
               <input type="text" id="image" name="image" placeholder="/festa-junina-community.jpg">
@@ -91,7 +86,6 @@
         <div>
           <h2 class="card-title" style="margin-bottom: 1.5rem;">Eventos Cadastrados</h2>
           <div id="eventsList">
-            <!-- Events will be populated by JavaScript -->
           </div>
         </div>
       </div>
@@ -125,9 +119,9 @@
       } else {
         let idEventoEditando = null;
 
-        // 🧭 Renderiza lista de eventos
+        // Renderiza lista de eventos
         async function renderizarListaEventos() {
-          let eventos = await API.eventos.listar(); // ✅ Espera o fetch
+          let eventos = await API.eventos.listar();
 
           if (!Array.isArray(eventos)) {
             eventos = eventos ? [eventos] : [];
@@ -156,15 +150,15 @@
                     <button onclick="editarEvento(${evento.id})" class="btn btn-outline">Editar</button>
                     <button onclick="confirmarExclusaoEvento(${evento.id})" class="btn btn-danger">Excluir</button>
                   </div>` : ''
-                }
+              }
               </div>
             `;
           }).join('');
         }
 
-        // 🧩 Buscar e preencher evento no formulário
+        // Buscar e preencher evento no formulário
         window.editarEvento = async function (id) {
-          const evento = await API.eventos.obter(id); // ✅ Usa GET, não PUT
+          const evento = await API.eventos.obter(id);
           idEventoEditando = id;
 
           document.getElementById('formTitle').textContent = 'Editar Evento';
@@ -180,16 +174,16 @@
           document.getElementById('eventForm').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // 🗑️ Excluir evento
+        // Excluir evento
         window.confirmarExclusaoEvento = async function (id) {
           if (confirm('Tem certeza que deseja excluir este evento?')) {
-            await API.eventos.cancelar(id); // ✅ Usa DELETE da API
+            await API.eventos.cancelar(id);
             await renderizarListaEventos();
             alert('Evento excluído com sucesso!');
           }
         };
 
-        // 🔄 Resetar formulário
+        // Resetar formulário
         window.resetForm = function () {
           idEventoEditando = null;
           document.getElementById('formTitle').textContent = 'Criar Novo Evento';
@@ -197,7 +191,7 @@
           document.getElementById('eventId').value = '';
         };
 
-        // 💾 Criar / atualizar evento
+        // Criar/atualizar evento
         document.getElementById('eventForm').addEventListener('submit', async function (e) {
           e.preventDefault();
           const dadosFormulario = new FormData(e.target);
@@ -215,10 +209,10 @@
           };
 
           if (idEventoEditando) {
-            await API.eventos.editar(idEventoEditando, dadosEvento); // ✅ PUT
+            await API.eventos.editar(idEventoEditando, dadosEvento);
             alert('Evento atualizado com sucesso!');
           } else {
-            await API.eventos.criar(dadosEvento); // ✅ POST
+            await API.eventos.criar(dadosEvento);
             alert('Evento criado com sucesso!');
           }
 
@@ -226,7 +220,7 @@
           await renderizarListaEventos();
         });
 
-        // 🚀 Inicializa lista
+        // Inicializa lista
         renderizarListaEventos();
       }
     }

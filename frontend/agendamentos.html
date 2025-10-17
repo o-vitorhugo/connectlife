@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meus Agendamentos - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css" />
 </head>
 
@@ -37,7 +38,7 @@
         <div id="btn-nova-atividade"></div>
       </div>
 
-      <!-- 🧭 Abas -->
+      <!-- Abas -->
       <div class="tabs">
         <ul class="tab-list">
           <li><button class="tab-button active" data-tab="confirmado">Confirmados</button></li>
@@ -72,9 +73,7 @@
 
   <script>
     (async () => {
-      // ==============================
-      // 🔐 Verifica autenticação
-      // ==============================
+      // Verifica autenticação
       if (!API.usuarios.requerAutenticacao()) {
         window.location.href = "./login.html";
         return;
@@ -82,9 +81,7 @@
 
       const usuario = API.usuarios.obterUsuarioAtual();
 
-      // ==============================
-      // 📦 Busca dados da API
-      // ==============================
+      // Busca dados da API
       let agendamentos = await API.calendario.obterAgendamentosUsuario(usuario.id);
       let atividades = await API.atividades.obterAtividadesUsuario(usuario.id);
       const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
@@ -92,9 +89,7 @@
       if (!Array.isArray(agendamentos)) agendamentos = [agendamentos];
       if (!Array.isArray(atividades)) atividades = [atividades];
 
-      // ==============================
-      // 🧭 Alterna abas
-      // ==============================
+      // Alterna abas
       document.querySelectorAll(".tab-button").forEach((button) => {
         button.addEventListener("click", () => {
           document.querySelectorAll(".tab-button").forEach((b) => b.classList.remove("active"));
@@ -104,9 +99,7 @@
         });
       });
 
-      // ==============================
-      // 🗓️ Renderiza agendamentos
-      // ==============================
+      // Renderiza agendamentos
       function renderizarAgendamentos(status, idContainer) {
         const container = document.getElementById(idContainer);
         if (!container) return;
@@ -193,17 +186,13 @@
         btnContainer.innerHTML = `<a href="./atividades.html" class="btn btn-primary">Nova Atividade</a>`;
       }
 
-      // ==============================
-      // 🚀 Renderiza todas as abas
-      // ==============================
+      // Renderiza todas as abas
       renderizarAgendamentos("confirmado", "confirmado");
       renderizarAgendamentos("pendente", "pendente");
       renderizarAgendamentos("concluido", "concluido");
       renderizarAgendamentos("cancelado", "cancelado");
 
-      // ==============================
-      // 🔘 Ações dos botões
-      // ==============================
+      // Ações dos botões
       window.confirmarAgendamento = async function (id) {
         await API.calendario.atualizar(id, { status: "confirmado" });
         location.reload();
@@ -222,9 +211,7 @@
         location.reload();
       };
 
-      // ==============================
-      // 🧭 Função auxiliar
-      // ==============================
+      // Função auxiliar
       function formatarData(dataStr) {
         if (!dataStr) return "N/A";
         const [ano, mes, dia] = dataStr.split("-");

@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calendário - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css" />
 </head>
 
@@ -84,7 +85,6 @@
   <script src="./js/api.js"></script>
   <script src="./js/global.js"></script>
   <script>
-    // ========= FUNÇÕES AUXILIARES =========
     function formatarDataLegivel(dataISO) {
       if (!dataISO) return "N/A";
       const [ano, mes, dia] = dataISO.split("T")[0].split("-");
@@ -95,10 +95,8 @@
       return `${parseInt(dia)} de ${nomesMeses[parseInt(mes) - 1]} de ${ano}`;
     }
 
-
-    // ========= INÍCIO DO SCRIPT PRINCIPAL =========
     document.addEventListener("DOMContentLoaded", async () => {
-      // 🔐 Verificação de autenticação
+      // Verificação de autenticação
       if (!API.usuarios.requerAutenticacao()) {
         window.location.href = "./login.html";
         return;
@@ -109,7 +107,6 @@
       let agendamentos = await API.calendario.obterAgendamentosUsuario(usuario.id);
       if (!Array.isArray(agendamentos)) agendamentos = [agendamentos];
 
-      // ========= FUNÇÃO: Renderizar calendário =========
       function renderizarCalendario() {
         const ano = dataAtual.getFullYear();
         const mes = dataAtual.getMonth();
@@ -162,7 +159,6 @@
         }
       }
 
-      // ========= FUNÇÃO: Selecionar Data =========
       async function selecionarData(stringData, agendamentosDia) {
         document.querySelectorAll(".calendar-day").forEach(el => el.classList.remove("selected"));
 
@@ -219,7 +215,7 @@
       // ========= INICIALIZA =========
       renderizarCalendario();
 
-      // 🔹 Seleciona automaticamente o dia atual (respeitando fuso horário local)
+      // Seleciona automaticamente o dia atual (respeitando fuso horário local)
       const hoje = new Date();
       const ano = hoje.getFullYear();
       const mes = String(hoje.getMonth() + 1).padStart(2, "0");

@@ -81,7 +81,11 @@ nav a:hover {
   color: var(--color-primary);
 }
 
-/*333333333333333333333333333333333333*/
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 
 /* Buttons */
 .btn {
@@ -128,6 +132,10 @@ nav a:hover {
 
 .btn-danger:hover {
   background-color: #c0392b;
+}
+
+header .user-menu .btn {
+  padding: 0.5rem 1rem;
 }
 
 /* Hero Section */

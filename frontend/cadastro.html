@@ -5,13 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
 
 <body>
   <header>
     <div class="header-content">
-      <a href="/index.html" class="logo">🤝Connect Life</a>
+      <a href="./index.html" class="logo">🤝Connect Life</a>
       <nav>
         <ul>
           <li><a href="./index.html">Início</a></li>
@@ -61,8 +62,8 @@
           </div>
 
           <div class="form-group">
-            <label for="age">Idade</label>
-            <input type="number" id="age" name="age" required placeholder="Sua idade" min="18">
+            <label for="birthDate">Data de Nascimento</label>
+            <input type="date" id="birthDate" name="birthDate" required>
           </div>
 
           <div id="elderly-fields" style="display: none;">
@@ -123,7 +124,7 @@
       }
     });
 
-    document.getElementById('register-form').addEventListener('submit', async(e) => {
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const dadosFormulario = new FormData(e.target);
@@ -132,8 +133,8 @@
         email: dadosFormulario.get('email'),
         senha: dadosFormulario.get('password'),
         telefone: dadosFormulario.get('phone'),
-        idade: parseInt(dadosFormulario.get('age')),
-        papel: dadosFormulario.get('role')  
+        data_nascimento: dadosFormulario.get('birthDate'),
+        papel: dadosFormulario.get('role')
       };
 
       if (dadosUsuario.papel === 'idoso') {
@@ -144,35 +145,35 @@
       }
 
       try {
-      // Aguarda o resultado do cadastro
-      const resultado = await API.usuarios.cadastrar(dadosUsuario);
+        // Aguarda o resultado do cadastro
+        const resultado = await API.usuarios.cadastrar(dadosUsuario);
 
-      if (resultado) {
-        showAlert('Cadastro realizado com sucesso! Entrando...', 'success');
+        if (resultado) {
+          showAlert('Cadastro realizado com sucesso! Entrando...', 'success');
 
-        // Faz login automaticamente com os dados cadastrados
-        const login = await API.usuarios.entrar(dadosUsuario.email, dadosUsuario.senha);
+          // Faz login automaticamente com os dados cadastrados
+          const login = await API.usuarios.entrar(dadosUsuario.email, dadosUsuario.senha);
 
-        if (login && login.token) {
-          // Salva no localStorage
-          localStorage.setItem('token', login.token);
-          localStorage.setItem('usuario', JSON.stringify(login.usuario));
+          if (login && login.token) {
+            // Salva no localStorage
+            localStorage.setItem('token', login.token);
+            localStorage.setItem('usuario', JSON.stringify(login.usuario));
 
-          // Redireciona para o dashboard
-          setTimeout(() => {
-            window.location.href = './dashboard.html';
-          }, 1200);
+            // Redireciona para o dashboard
+            setTimeout(() => {
+              window.location.href = './dashboard.html';
+            }, 1200);
+          } else {
+            showAlert('Cadastro feito, mas falha ao entrar automaticamente.', 'error');
+          }
         } else {
-          showAlert('Cadastro feito, mas falha ao entrar automaticamente.', 'error');
+          showAlert('Erro ao realizar cadastro.', 'error');
         }
-      } else {
-        showAlert('Erro ao realizar cadastro.', 'error');
+      } catch (erro) {
+        console.error('Erro no cadastro:', erro);
+        showAlert('Erro ao tentar cadastrar. Tente novamente.', 'error');
       }
-    } catch (erro) {
-      console.error('Erro no cadastro:', erro);
-      showAlert('Erro ao tentar cadastrar. Tente novamente.', 'error');
-    }
-  });
+    });
   </script>
 </body>
 

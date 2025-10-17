@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eventos - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
 
@@ -38,7 +39,7 @@
       </div>
 
       <div class="grid grid-cols-3" id="eventsGrid">
-         Events will be populated by JavaScript 
+        Events will be populated by JavaScript
       </div>
     </div>
   </main>
@@ -61,17 +62,17 @@
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        // 1️⃣ Obtém o usuário atual (se existir)
+        // Obtém o usuário atual (se existir)
         const usuario = API.usuarios.obterUsuarioAtual();
 
-        // 2️⃣ Se for voluntário → mostra botão de gerenciamento
+        // Se for voluntário → mostra botão de gerenciamento
         if (usuario && usuario.papel === "VOLUNTARIO") {
           document.getElementById("managerActions").innerHTML = `
           <a href="./gerenciar-eventos.html" class="btn btn-primary">Gerenciar Eventos</a>
         `;
         }
 
-        // 3️⃣ Busca os eventos do servidor
+        // Busca os eventos do servidor
         const eventos = await API.eventos.listar();
         const gradeEventos = document.getElementById("eventsGrid");
 
@@ -97,7 +98,7 @@
           }
         }
 
-        // 4️⃣ Renderiza os cards de eventos
+        // Renderiza os cards de eventos
         gradeEventos.innerHTML = eventos.map(evento => {
           const vagasRestantes = evento.capacidade - (evento.inscritos || 0);
           const estaLotado = vagasRestantes <= 0;
@@ -188,14 +189,14 @@
           }
         };
 
-        // 6️⃣ Função auxiliar de formatação de data (caso não exista)
+        // Função auxiliar de formatação de data (caso não exista)
         function formatarData(dataISO) {
           if (!dataISO) return "Data inválida";
           const data = new Date(dataISO);
           return data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
         }
 
-        
+
 
       } catch (erro) {
         console.error("[Eventos] Erro ao carregar:", erro);

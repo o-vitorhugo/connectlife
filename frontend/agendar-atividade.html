@@ -1,121 +1,119 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agendar Atividade - Connect Life</title>
-    <link rel="stylesheet" href="./styles/main.css" />
-  </head>
 
-  <body>
-    <header>
-      <div class="header-content">
-        <a href="./index.html" class="logo">🤝 Connect Life</a>
-        <nav>
-          <ul>
-            <li><a href="./dashboard.html">Dashboard</a></li>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agendar Atividade - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="./index.html" class="logo">🤝 Connect Life</a>
+      <nav>
+        <ul>
+          <li><a href="./dashboard.html">Dashboard</a></li>
           <li><a href="./atividades.html">Atividades</a></li>
           <li><a href="./agendamentos.html">Agendamentos</a></li>
           <li><a href="./calendario.html">Calendário</a></li>
           <li><a href="./historico.html">Histórico</a></li>
           <li><a href="./eventos.html">Eventos</a></li>
-          </ul>
-        </nav>
-        <div class="user-menu">
-          <span id="user-name"></span>
-          <span id="user-role" class="role-badge"></span>
-          <button id="logout-btn" class="btn btn-outline">Sair</button>
+        </ul>
+      </nav>
+      <div class="user-menu">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-badge"></span>
+        <button id="logout-btn" class="btn btn-outline">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2rem 1rem">
+    <div class="container" style="max-width: 900px">
+      <h1 style="margin-bottom: 2rem">Agendar Atividade</h1>
+
+      <div class="grid grid-cols-2" style="margin-bottom: 2rem">
+        <div class="card" id="activity-info"></div>
+
+        <div class="card">
+          <h2 class="card-title" style="margin-bottom: 1rem">Detalhes do Agendamento</h2>
+          <form id="schedule-form">
+            <div class="form-group">
+              <label for="date">Data</label>
+              <input type="date" id="date" name="date" required min="" />
+            </div>
+
+            <div class="form-group">
+              <label for="time">Horário</label>
+              <input type="time" id="time" name="time" required />
+            </div>
+
+            <div class="form-group" id="participant-group">
+              <label for="participant">Selecione o Participante</label>
+              <select id="participant" name="participant">
+                <option value="">Escolha...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Observações (opcional)</label>
+              <textarea id="notes" name="notes" placeholder="Informações adicionais sobre o agendamento"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%">Confirmar Agendamento</button>
+          </form>
         </div>
       </div>
-    </header>
+    </div>
+  </main>
 
-    <main style="padding: 2rem 1rem">
-      <div class="container" style="max-width: 900px">
-        <h1 style="margin-bottom: 2rem">Agendar Atividade</h1>
-
-        <div class="grid grid-cols-2" style="margin-bottom: 2rem">
-          <div class="card" id="activity-info"></div>
-
-          <div class="card">
-            <h2 class="card-title" style="margin-bottom: 1rem">Detalhes do Agendamento</h2>
-            <form id="schedule-form">
-              <div class="form-group">
-                <label for="date">Data</label>
-                <input type="date" id="date" name="date" required min="" />
-              </div>
-
-              <div class="form-group">
-                <label for="time">Horário</label>
-                <input type="time" id="time" name="time" required />
-              </div>
-
-              <div class="form-group" id="participant-group">
-                <label for="participant">Selecione o Participante</label>
-                <select id="participant" name="participant">
-                  <option value="">Escolha...</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="notes">Observações (opcional)</label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  placeholder="Informações adicionais sobre o agendamento"
-                ></textarea>
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="width: 100%">Confirmar Agendamento</button>
-            </form>
-          </div>
-        </div>
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Connect Life</h3>
+        <p>Conectando gerações através de atividades significativas.</p>
       </div>
-    </main>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
+    </div>
+  </footer>
 
-    <footer>
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>Connect Life</h3>
-          <p>Conectando gerações através de atividades significativas.</p>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2025 Connect Life. Todos os direitos reservados.</p>
-      </div>
-    </footer>
+  <script src="./js/api.js"></script>
 
-    <script src="./js/api.js"></script>
+  <script src="./js/global.js"></script>
 
-    <script src="./js/global.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const usuario = API.usuarios.obterUsuarioAtual()
+        if (!usuario) {
+          window.location.href = "./login.html"
+          return
+        }
 
-    <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          const usuario = API.usuarios.obterUsuarioAtual()
-          if (!usuario) {
-            window.location.href = "./login.html"
-            return
-          }
+        if (usuario.papel.toUpperCase() !== "IDOSO") {
+          alert("Apenas idosos podem criar agendamentos.")
+          window.location.href = "./atividades.html"
+          return
+        }
 
-          if (usuario.papel.toUpperCase() !== "IDOSO") {
-            alert("Apenas idosos podem criar agendamentos.")
-            window.location.href = "./atividades.html"
-            return
-          }
+        const parametrosUrl = new URLSearchParams(window.location.search)
+        const idAtividade = parametrosUrl.get("id")
 
-          const parametrosUrl = new URLSearchParams(window.location.search)
-          const idAtividade = parametrosUrl.get("id")
+        const atividades = await API.atividades.listar()
+        const atividade = atividades.find((a) => a.id == idAtividade)
 
-          const atividades = await API.atividades.listar()
-          const atividade = atividades.find((a) => a.id == idAtividade)
+        if (!atividade) {
+          alert("Atividade não encontrada!")
+          window.location.href = "./atividades.html"
+          return
+        }
 
-          if (!atividade) {
-            alert("Atividade não encontrada!")
-            window.location.href = "./atividades.html"
-            return
-          }
-
-          document.getElementById("activity-info").innerHTML = `
+        document.getElementById("activity-info").innerHTML = `
           <img src="${atividade.imagem || "./img/padrao.jpg"}"
             alt="${atividade.titulo}"
             style="width:100%; height:200px; object-fit:cover; border-radius:8px; margin-bottom:1rem;">
@@ -128,48 +126,49 @@
           <p>⏱️ Duração: ${atividade.duracao || "Não informada"}</p>
         `
 
-          const hoje = new Date().toISOString().split("T")[0]
-          document.getElementById("date").setAttribute("min", hoje)
+        const hoje = new Date().toISOString().split("T")[0]
+        document.getElementById("date").setAttribute("min", hoje)
 
-          const usuarios = await API.usuarios.listarInformacoes()
-          const seletor = document.getElementById("participant")
-          const voluntarios = usuarios.filter((u) => u.papel && u.papel.toUpperCase() === "VOLUNTARIO")
+        const usuarios = await API.usuarios.listarInformacoes()
+        const seletor = document.getElementById("participant")
+        const voluntarios = usuarios.filter((u) => u.papel && u.papel.toUpperCase() === "VOLUNTARIO")
 
-          seletor.innerHTML = `
+        seletor.innerHTML = `
             <option value="">Deixar em aberto para voluntários</option>
             ${voluntarios
-              .map(
-                (v) => `
+            .map(
+              (v) => `
               <option value="${v.id}">${v.nome}</option>
             `
-              )
-              .join("")}
+            )
+            .join("")}
           `
 
-          document.getElementById("schedule-form").addEventListener("submit", async (e) => {
-            e.preventDefault()
+        document.getElementById("schedule-form").addEventListener("submit", async (e) => {
+          e.preventDefault()
 
-            const form = new FormData(e.target)
-            const participanteId = form.get("participant") ? parseInt(form.get("participant")) : null
+          const form = new FormData(e.target)
+          const participanteId = form.get("participant") ? parseInt(form.get("participant")) : null
 
-            const agendamento = {
-              id_atividade: parseInt(idAtividade),
-              id_voluntario: participanteId,
-              data: form.get("date"),
-              hora: form.get("time"),
-              observacoes: form.get("notes") || "",
-            }
+          const agendamento = {
+            id_atividade: parseInt(idAtividade),
+            id_voluntario: participanteId,
+            data: form.get("date"),
+            hora: form.get("time"),
+            observacoes: form.get("notes") || "",
+          }
 
-            await API.calendario.adicionarAtividade(agendamento)
+          await API.calendario.adicionarAtividade(agendamento)
 
-            alert("Agendamento criado com sucesso!")
-            window.location.href = "./agendamentos.html"
-          })
-        } catch (erro) {
-          console.error("Erro ao carregar agendamento:", erro)
-          alert("Ocorreu um erro ao carregar a página. Tente novamente.")
-        }
-      })
-    </script>
-  </body>
+          alert("Agendamento criado com sucesso!")
+          window.location.href = "./agendamentos.html"
+        })
+      } catch (erro) {
+        console.error("Erro ao carregar agendamento:", erro)
+        alert("Ocorreu um erro ao carregar a página. Tente novamente.")
+      }
+    })
+  </script>
+</body>
+
 </html>

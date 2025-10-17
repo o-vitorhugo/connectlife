@@ -24,7 +24,10 @@ export const Usuario = sequelize.define('Usuario', {
     type: DataTypes.ENUM('IDOSO', 'VOLUNTARIO'),
     allowNull: false,
   },
-  idade: DataTypes.INTEGER,
+  data_nascimento: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
   telefone: DataTypes.STRING,
   endereco: DataTypes.STRING,
   habilidades: {

@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
 
@@ -78,24 +79,24 @@
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        // 1️⃣ — Verifica autenticação
+        // Verifica autenticação
         if (!API.usuarios.requerAutenticacao()) {
           return; // redireciona automaticamente para login
         }
 
-        // 2️⃣ — Obtém usuário logado do localStorage
+        // Obtém usuário logado do localStorage
         const usuario = API.usuarios.obterUsuarioAtual();
         const papel = usuario.papel?.toUpperCase()?.trim();
 
         console.log(papel)
 
-        // 3️⃣ — Busca dados reais do servidor
+        // Busca dados reais do servidor
         const [atividades, calendario] = await Promise.all([
           API.atividades.listar(),   // GET /atividades
           API.calendario.obter(),    // GET /calendario (agendamentos)
         ]);
 
-        // 4️⃣ — Garante que os dados são arrays
+        // Garante que os dados são arrays
         const listaAtividades = Array.isArray(atividades) ? atividades : [];
         const listaCalendario = Array.isArray(calendario) ? calendario : [];
 
@@ -103,7 +104,7 @@
           console.warn("[Dashboard] API /agendamentos não retornou um array:", calendario);
         }
 
-        // 5️⃣ — Filtra agendamentos conforme o papel
+        // Filtra agendamentos conforme o papel
         let agendamentos = [];
 
         if (papel === "IDOSO") {
@@ -118,12 +119,12 @@
 
         console.log("Agendamentos filtrados:", agendamentos);
 
-        // 6️⃣ — Calcula estatísticas
+        // Calcula estatísticas
         const contagemConfirmados = agendamentos.filter(a => a.status === "confirmado").length;
         const contagemPendentes = agendamentos.filter(a => a.status === "pendente").length;
         const contagemConcluidos = agendamentos.filter(a => a.status === "concluido").length;
 
-        // 7️⃣ — Renderiza cards de estatísticas
+        // Renderiza cards de estatísticas
         const gradeEstatisticas = document.getElementById("stats-grid");
         gradeEstatisticas.innerHTML = `
         <div class="stat-card">
@@ -144,7 +145,7 @@
         </div>
       `;
 
-        // 8️⃣ — Seleciona próximos agendamentos (pendentes ou confirmados)
+        // Seleciona próximos agendamentos (pendentes ou confirmados)
         const agendamentosProximos = agendamentos
           .filter(a => ["confirmado", "pendente"].includes(a.status))
           .sort((a, b) => new Date(a.data) - new Date(b.data))
@@ -152,7 +153,7 @@
 
         const containerProximos = document.getElementById("upcoming-schedules");
 
-        // 9️⃣ — Exibe próximos agendamentos
+        // Exibe próximos agendamentos
         if (agendamentosProximos.length === 0) {
           containerProximos.innerHTML = `
           <p class="text-muted">Nenhum agendamento próximo</p>

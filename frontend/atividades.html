@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Atividades - Connect Life</title>
+  <link rel="icon" href="./images/handshake-emoji.png" type="image/x-icon">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
 
@@ -52,25 +53,25 @@
   </footer>
 
   <script src="./js/api.js"></script>
-  
+
   <script src="./js/global.js"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        // 1️⃣ Verifica autenticação (opcional)
+        // Verifica autenticação
         const usuario = API.usuarios.obterUsuarioAtual();
 
-        // 2️⃣ Busca as atividades do servidor
+        // Busca as atividades do servidor
         const atividades = await API.atividades.listar();
 
-        // 3️⃣ Obtém o container do grid
+        // Obtém o container do grid
         const gradeAtividades = document.getElementById("activities-grid");
 
-        // 4️⃣ Garante que é array
+        // Garante que é array
         const listaAtividades = Array.isArray(atividades) ? atividades : [];
 
-        // 5️⃣ Renderiza cards dinamicamente
+        // Renderiza cards dinamicamente
         gradeAtividades.innerHTML = listaAtividades
           .map((atividade) => `
           <div class="card">
@@ -88,7 +89,7 @@
               <span class="badge badge-warning">${atividade.dificuldade || 'N/A'}</span>
             </div>
             <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1rem;">⏱️ ${atividade.duracao || 'Sem duração'}</p>
-            ${usuario 
+            ${usuario
               ? usuario.papel === "IDOSO"
                 ? `<a href="./agendar-atividade.html?id=${atividade.id}" class="btn btn-primary" style="width: 100%;">Agendar</a>`
                 : ""
