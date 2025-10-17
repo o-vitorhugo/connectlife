@@ -25,6 +25,40 @@ roteador.get("/", async (req, res) => {
   }
 });
 
+// ⚙️ Buscar atividades associadas ao usuário (idoso ou voluntário)
+roteador.get("/usuario/:id", verificarToken, async (req, res) => {
+  try {
+    const idUsuario = Number(req.params.id);
+
+    // O idoso sempre existe. Voluntário pode ser nulo (atividade pendente)
+    const agendamentos = await Agendamento.findAll({
+      where: {
+        [Op.or]: [
+          { id_idoso: idUsuario }, 
+          { id_voluntario: { [Op.is]: null } },      
+          { id_voluntario: idUsuario } 
+        ],
+      },
+      include: [{ model: Atividade, as: "atividade" }],
+    });
+
+    if (!agendamentos || agendamentos.length === 0) {
+      return res.json([]);
+    }
+
+    // Extrai apenas as atividades válidas
+    const atividades = agendamentos
+      .map(a => a.atividade)
+      .filter(a => !!a);
+
+    res.json(atividades);
+  } catch (erro) {
+    console.error("Erro ao buscar atividades do usuário:", erro);
+    res.status(500).json({ erro: "Erro ao buscar atividades do usuário" });
+  }
+});
+
+
 // GET /api/atividades/:id - Obter atividade por ID
 roteador.get("/:id", async (req, res) => {
   try {
@@ -105,25 +139,5 @@ roteador.delete("/:id", verificarToken, verificarPapel("admin"), async (req, res
   }
 });
 
-roteador.get("/usuario/:id", verificarToken, async (req, res) => {
-  try {
-    const idUsuario = parseInt(req.params.id, 10);
-
-    const agendamentos = await Agendamento.findAll({
-      where: {
-        [Op.or]: [{ id_idoso: idUsuario }, { id_voluntario: idUsuario }],
-      },
-      include: [{ model: Atividade, as: "atividade" }],
-    });
-
-    if (agendamentos.length === 0) return res.json([]);
-
-    const atividades = agendamentos.map(a => a.atividade).filter(a => !!a);
-    res.json(atividades);
-  } catch (erro) {
-    console.error("Erro ao buscar atividades do usuário:", erro);
-    res.status(500).json({ erro: "Erro ao buscar atividades do usuário" });
-  }
-});
 
 export default roteador;

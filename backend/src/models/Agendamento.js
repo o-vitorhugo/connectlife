@@ -25,7 +25,7 @@ const Agendamento = sequelize.define(
     observacoes: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
+    }
   },
   {
     tableName: "agendamentos",

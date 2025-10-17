@@ -55,7 +55,7 @@ roteador.get("/", verificarToken, async (req, res) => {
     const usuarioId = req.usuario.id
 
     const where = {
-      [Op.or]: [{ id_idoso: usuarioId }, { id_voluntario: usuarioId }, {id_voluntario: null}],
+      [Op.or]: [{ id_idoso: usuarioId }, { id_voluntario: usuarioId }],
       ...(status && { status }),
     }
 
@@ -87,6 +87,67 @@ roteador.get("/", verificarToken, async (req, res) => {
 })
 
 // ===============================
+// GET /api/agendamentos/usuario/:id
+// ===============================
+roteador.get("/usuario/:id", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params
+    const usuarioPapel = req.usuario.papel
+    const agendamentos = await Agendamento.findAll({
+      where: {
+          [Op.or]: [
+            { id_idoso: id },          // qualquer idoso
+            { id_voluntario: id },     // qualquer voluntário existente
+            ...(usuarioPapel === "VOLUNTARIO"
+              ? [
+                  { id_voluntario: { [Op.is]: null } },
+                ]
+              : [])
+          ],
+        },
+      include: [
+        { model: Atividade, as: "atividade" },
+        { model: Usuario, as: "idoso", attributes: ["id", "nome", "email"] },
+        { model: Usuario, as: "voluntario", attributes: ["id", "nome", "email"] },
+      ],
+      order: [["data", "ASC"]],
+    })
+
+    if (agendamentos.length > 0) {
+      await atualizarAgendamentosExpirados(agendamentos)
+
+      const agendamentosAtualizados = await Agendamento.findAll({
+        where: {
+          [Op.or]: [
+            { id_idoso: id },          // qualquer idoso
+            { id_voluntario: id },     // qualquer voluntário existente
+            ...(usuarioPapel === "VOLUNTARIO"
+              ? [
+                  { id_voluntario: { [Op.is]: null } },
+                ]
+              : [])
+          ],
+        },
+        include: [
+          { model: Atividade, as: "atividade" },
+          { model: Usuario, as: "idoso", attributes: ["id", "nome", "email"] },
+          { model: Usuario, as: "voluntario", attributes: ["id", "nome", "email"] },
+        ],
+        order: [["data", "ASC"]],
+      })
+
+      res.json(agendamentosAtualizados)
+    } else {
+      res.json([])
+    }
+  } catch (erro) {
+    console.error("Erro ao buscar agendamentos do usuário:", erro)
+    res.status(500).json({ erro: erro.message })
+  }
+})
+
+
+// ===============================
 // GET /api/agendamentos/:id
 // ===============================
 roteador.get("/:id", verificarToken, async (req, res) => {
@@ -102,7 +163,7 @@ roteador.get("/:id", verificarToken, async (req, res) => {
     if (!agendamento) return res.status(404).json({ erro: "Agendamento não encontrado" })
 
     const usuario = req.usuario
-    if (agendamento.id_idoso !== usuario.id && agendamento.id_voluntario !== usuario.id) {
+    if (agendamento.id_idoso !== usuario.id && agendamento.id_voluntario !== usuario.id && agendamento.id_voluntario !== null) {
       return res.status(403).json({ erro: "Sem permissão para acessar este agendamento" })
     }
 
@@ -163,11 +224,12 @@ roteador.put("/:id", verificarToken, async (req, res) => {
       return res.status(403).json({ erro: "Sem permissão para atualizar este agendamento" })
     }
 
-    if (papelUsuario === "VOLUNTARIO" && agendamento.id_voluntario !== usuario.id) {
+    if (papelUsuario === "VOLUNTARIO" && agendamento.id_voluntario !== usuario.id && agendamento.id_voluntario !== null) {
       return res.status(403).json({ erro: "Sem permissão para atualizar este agendamento" })
     }
 
     await agendamento.update(req.body)
+    await agendamento.update({ id_voluntario: req.usuario.id });
     res.json({ mensagem: "Agendamento atualizado com sucesso", agendamento })
   } catch (erro) {
     console.error("Erro ao atualizar agendamento:", erro)
@@ -220,51 +282,6 @@ roteador.delete("/:id", verificarToken, async (req, res) => {
     return res.status(403).json({ erro: "Papel de usuário não autorizado para esta ação" })
   } catch (erro) {
     console.error("Erro ao deletar/desconfirmar agendamento:", erro)
-    res.status(500).json({ erro: erro.message })
-  }
-})
-
-
-// ===============================
-// GET /api/agendamentos/usuario/:id
-// ===============================
-roteador.get("/usuario/:id", verificarToken, async (req, res) => {
-  try {
-    const { id } = req.params
-
-    const agendamentos = await Agendamento.findAll({
-      where: {
-        [Op.or]: [{ id_idoso: id }, { id_voluntario: id }],
-      },
-      include: [
-        { model: Atividade, as: "atividade" },
-        { model: Usuario, as: "idoso", attributes: ["id", "nome", "email"] },
-        { model: Usuario, as: "voluntario", attributes: ["id", "nome", "email"] },
-      ],
-      order: [["data", "ASC"]],
-    })
-
-    if (agendamentos.length > 0) {
-      await atualizarAgendamentosExpirados(agendamentos)
-
-      const agendamentosAtualizados = await Agendamento.findAll({
-        where: {
-          [Op.or]: [{ id_idoso: id }, { id_voluntario: id }],
-        },
-        include: [
-          { model: Atividade, as: "atividade" },
-          { model: Usuario, as: "idoso", attributes: ["id", "nome", "email"] },
-          { model: Usuario, as: "voluntario", attributes: ["id", "nome", "email"] },
-        ],
-        order: [["data", "ASC"]],
-      })
-
-      res.json(agendamentosAtualizados)
-    } else {
-      res.json([])
-    }
-  } catch (erro) {
-    console.error("Erro ao buscar agendamentos do usuário:", erro)
     res.status(500).json({ erro: erro.message })
   }
 })

@@ -211,7 +211,7 @@
       // 🔘 Ações dos botões
       // ==============================
       window.confirmarAgendamento = async function (id) {
-        await API.calendario.atualizar(id, { status: "confirmado" });
+        await API.calendario.atualizar(id, { status: "confirmado"});
         location.reload();
       };
 
